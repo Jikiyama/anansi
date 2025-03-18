@@ -1,0 +1,5 @@
+
+> text-analyzer-frontend@0.0.1 dev
+> vite --host --port 5174
+
+sh: line 1: /home/ec2-user/ANANSI/anansi/node_modules/.bin/vite: Permission denied

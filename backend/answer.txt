@@ -1,0 +1,75 @@
+{
+  "events": [
+    {
+      "sentence": "Diana is rehearsing the presentation for next week with her boss Emmanuel.",
+      "event_type": "rehearsal",
+      "verb": "rehearsing",
+      "agent": "Diana",
+      "patients": "the presentation",
+      "temporal_reference": "next week",
+      "cause": "Assumed preparation for an upcoming presentation",
+      "purpose_context": "To practice and refine the presentation before its delivery"
+    },
+    {
+      "sentence": "He is teaching her all the nuances of how to present it.",
+      "event_type": "instruction",
+      "verb": "teaching",
+      "agent": "Emmanuel",
+      "patients": "Diana",
+      "temporal_reference": "",
+      "cause": "Assumed need to enhance presentation skills",
+      "purpose_context": "To ensure Diana understands all the nuances of presenting"
+    }
+  ],
+  "named_entities": {
+    "persons": [
+      {
+        "entity": "Diana",
+        "type": "person",
+        "description": "Employee rehearsing the presentation (assumed presenter)"
+      },
+      {
+        "entity": "Emmanuel",
+        "type": "person",
+        "description": "Diana's boss, acting as an instructor on presentation nuances"
+      }
+    ],
+    "organizations": [],
+    "locations": [],
+    "institutions": [],
+    "dates": [],
+    "legal_terms": []
+  },
+  "temporal_references": [
+    {
+      "reference": "next week",
+      "description": "Indicates the presentation is scheduled for the week following the current document date"
+    }
+  ],
+  "important_notes": [
+    "The analysis uses assumptions where the context is inferred, such as the cause for rehearsing and teaching being preparation for an upcoming presentation."
+  ],
+  "timeline_of_events": [
+    {
+      "date": "2025-03-19",
+      "events": [
+        {
+          "event_summary": "Diana rehearses the presentation",
+          "event_verb": "rehearsing",
+          "temporal_reference_connection": "next week"
+        }
+      ]
+    },
+    {
+      "date": "2025-03-12",
+      "events": [
+        {
+          "event_summary": "Emmanuel teaches Diana the nuances of presenting",
+          "event_verb": "teaching",
+          "temporal_reference_connection": "No explicit temporal reference; assumed concurrent with the rehearsal process"
+        }
+      ]
+    }
+  ],
+  "summary": "The text describes a scenario in which Diana is actively preparing for an upcoming presentation by rehearsing it, with guidance from her boss Emmanuel. While Diana practices her delivery for a presentation scheduled for next week, Emmanuel provides detailed instruction on the nuances of effective presentation skills. This collaborative process underscores the importance of preparation and mentorship in professional settings."
+}
