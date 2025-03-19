@@ -1,4 +1,4 @@
-import React, { useMemo } from 'react';
+import React, { useMemo, useState, useRef, useCallback } from 'react';
 import ForceGraph2D from 'react-force-graph-2d';
 
 /**
@@ -14,6 +14,8 @@ import ForceGraph2D from 'react-force-graph-2d';
  */
 export default function EntityRelationsGraph({ data }) {
   console.log("EntityRelationsGraph component received data:", data);
+  const [hoveredLink, setHoveredLink] = useState(null);
+  const graphRef = useRef();
   
   // Convert "entity_relations" array into { nodes: [...], links: [...] } format
   const graphData = useMemo(() => {
@@ -37,11 +39,30 @@ export default function EntityRelationsGraph({ data }) {
     const links = data.map((rel, idx) => ({
       source: rel.source_entity,
       target: rel.target_entity,
-      relation: rel.relation // We'll draw this text on the link
+      relation: rel.relation, // We'll draw this text on the link
+      id: idx
     }));
 
     return { nodes, links };
   }, [data]);
+
+  const handleLinkHover = useCallback(link => {
+    setHoveredLink(link);
+    
+    // Set cursor to pointer when hovering over a link
+    document.getElementById('entity-graph-container').style.cursor = link ? 'pointer' : 'default';
+    
+    // Re-render the graph
+    if (graphRef.current) {
+      graphRef.current.refresh();
+    }
+  }, []);
+
+  // Format relation text for tooltip
+  const getLinkTooltip = useCallback(link => {
+    if (!link) return '';
+    return `${link.source.id || link.source} ${link.relation} ${link.target.id || link.target}`;
+  }, []);
 
   if (!graphData.nodes.length) {
     return <p>No entity relations found.</p>;
@@ -51,25 +72,90 @@ export default function EntityRelationsGraph({ data }) {
     <div>
       <div style={{ marginBottom: '10px' }}>
         <h3>Entity Relations Graph</h3>
-        <p>The text on edges represents the relationship between entities (e.g., "{data?.[0]?.relation || 'attacked'}")</p>
+        <p>
+          <b>Hover over the arrows to see the relationship between entities.</b> 
+          The relationship (e.g., "{data?.[0]?.relation || 'attacked'}") describes how entities interact.
+        </p>
+        {hoveredLink && (
+          <div style={{ 
+            backgroundColor: '#f0f8ff', 
+            padding: '8px', 
+            borderRadius: '4px',
+            border: '1px solid #007BFF',
+            marginTop: '10px'
+          }}>
+            <b>Highlighted Relationship:</b> {hoveredLink.source.id || hoveredLink.source} <span style={{ color: '#007BFF', fontWeight: 'bold' }}>{hoveredLink.relation}</span> {hoveredLink.target.id || hoveredLink.target}
+          </div>
+        )}
       </div>
-      <div style={{ width: '800px', height: '600px', border: '1px solid #ccc' }}>
+      <div 
+        id="entity-graph-container"
+        style={{ 
+          width: '800px', 
+          height: '600px', 
+          border: '1px solid #ccc', 
+          position: 'relative' 
+        }}
+      >
         <ForceGraph2D
+          ref={graphRef}
           graphData={graphData}
           nodeAutoColorBy="id"
           linkDirectionalArrowLength={6}
           linkDirectionalArrowRelPos={1}
           
-          // Make links thicker and colorful
-          linkWidth={2}
-          linkColor={() => '#007BFF'}  // Use a consistent blue color for links
+          // Make links thicker and colorful - highlight hovered link
+          linkWidth={link => link === hoveredLink ? 4 : 2}
+          linkColor={link => link === hoveredLink ? '#ff9900' : '#007BFF'}
 
           // Draw text along each link with enhanced visibility:
           linkDirectionalText={link => link.relation}
           linkDirectionalTextColor={() => 'black'}
           linkDirectionalTextOffset={-10}
-          linkDirectionalTextSize={14}  // Larger text
-          linkDirectionalTextMode="intermediate" // Better positioning
+          linkDirectionalTextSize={link => link === hoveredLink ? 18 : 14}
+          linkDirectionalTextMode="intermediate"
+          
+          // Handle hover events
+          onLinkHover={handleLinkHover}
+          linkLabel={getLinkTooltip}
+          linkCanvasObjectMode={() => 'after'}
+          
+          // Custom link drawing to highlight relationships
+          linkCanvasObject={(link, ctx, globalScale) => {
+            if (link === hoveredLink) {
+              // Draw a highlight around the link
+              const start = link.source;
+              const end = link.target;
+              
+              // Calculate link midpoint for relation text
+              const x = start.x + (end.x - start.x) / 2;
+              const y = start.y + (end.y - start.y) / 2;
+              
+              // Draw a background for the relation text
+              const fontSize = 18 / globalScale;
+              ctx.font = `bold ${fontSize}px Sans-Serif`;
+              const textWidth = ctx.measureText(link.relation).width;
+              const bckgDimensions = [textWidth, fontSize].map(n => n + 12);
+              
+              ctx.fillStyle = 'rgba(255, 153, 0, 0.2)';
+              ctx.fillRect(
+                x - bckgDimensions[0]/2, 
+                y - bckgDimensions[1]/2, 
+                bckgDimensions[0], 
+                bckgDimensions[1]
+              );
+              
+              // Draw a border around the background
+              ctx.strokeStyle = '#ff9900';
+              ctx.lineWidth = 2 / globalScale;
+              ctx.strokeRect(
+                x - bckgDimensions[0]/2, 
+                y - bckgDimensions[1]/2, 
+                bckgDimensions[0], 
+                bckgDimensions[1]
+              );
+            }
+          }}
 
           // Custom-draw each node + text in nodeCanvasObject:
           nodeCanvasObject={(node, ctx, globalScale) => {
@@ -106,6 +192,15 @@ export default function EntityRelationsGraph({ data }) {
           width={800}
           height={600}
         />
+      </div>
+      <div style={{ marginTop: '10px', border: '1px solid #ddd', padding: '8px', borderRadius: '4px' }}>
+        <h4 style={{ margin: '0 0 8px 0' }}>How to use this graph:</h4>
+        <ul style={{ margin: 0, paddingLeft: '20px' }}>
+          <li>Hover over the arrows to see the relationship between entities</li>
+          <li>The text on each arrow shows the action (e.g., "{data?.[0]?.relation || 'attacked'}")</li>
+          <li>Drag nodes to rearrange the graph</li>
+          <li>Scroll to zoom in/out</li>
+        </ul>
       </div>
     </div>
   );
