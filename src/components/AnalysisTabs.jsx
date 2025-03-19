@@ -2,6 +2,7 @@ import React, { useState } from "react";
 import TimelineTab from "./TimelineTab.jsx";
 import CausationGraph from "./CausationGraph.jsx";
 import EntityRelationsGraph from "./EntityRelationsGraph.jsx"; // <-- NEW IMPORT
+import DictionaryPlusTab from "./DictionaryPlusTab.jsx"; // <-- NEW IMPORT
 
 function AnalysisTabs({ analysisData }) {
   const [activeTab, setActiveTab] = useState("summary");
@@ -227,6 +228,9 @@ function AnalysisTabs({ analysisData }) {
       case "entity-relations":
         return renderEntityRelationsTab();
 
+      case "dictionary-plus":
+        return <DictionaryPlusTab analysisData={analysisData} />;
+
       default:
         return <div>No tab selected</div>;
     }
@@ -234,19 +238,131 @@ function AnalysisTabs({ analysisData }) {
 
   return (
     <div>
-      <nav style={{ marginBottom: "1rem" }}>
-        <button onClick={() => setActiveTab("summary")}>Summary</button>
-        <button onClick={() => setActiveTab("entities")}>Entities</button>
-        <button onClick={() => setActiveTab("events")}>Events</button>
-        <button onClick={() => setActiveTab("temporal")}>Temporal</button>
-        <button onClick={() => setActiveTab("timeline")}>Timeline</button>
-        <button onClick={() => setActiveTab("causation")}>Causation</button>
-        {/* NEW: The button for "Entity Relations" */}
-        <button onClick={() => setActiveTab("entity-relations")}>
+      <div style={{ display: "flex", marginBottom: "1rem" }}>
+        <button
+          onClick={() => setActiveTab("summary")}
+          style={{
+            backgroundColor: activeTab === "summary" ? "#007BFF" : "#f0f0f0",
+            color: activeTab === "summary" ? "white" : "black",
+            border: "none",
+            padding: "0.5rem 1rem",
+            marginRight: "0.5rem",
+            cursor: "pointer",
+            borderRadius: "4px",
+          }}
+        >
+          Summary
+        </button>
+        <button
+          onClick={() => setActiveTab("entities")}
+          style={{
+            backgroundColor: activeTab === "entities" ? "#007BFF" : "#f0f0f0",
+            color: activeTab === "entities" ? "white" : "black",
+            border: "none",
+            padding: "0.5rem 1rem",
+            marginRight: "0.5rem",
+            cursor: "pointer",
+            borderRadius: "4px",
+          }}
+        >
+          Entities
+        </button>
+        <button
+          onClick={() => setActiveTab("events")}
+          style={{
+            backgroundColor: activeTab === "events" ? "#007BFF" : "#f0f0f0",
+            color: activeTab === "events" ? "white" : "black",
+            border: "none",
+            padding: "0.5rem 1rem",
+            marginRight: "0.5rem",
+            cursor: "pointer",
+            borderRadius: "4px",
+          }}
+        >
+          Events
+        </button>
+        <button
+          onClick={() => setActiveTab("temporal")}
+          style={{
+            backgroundColor: activeTab === "temporal" ? "#007BFF" : "#f0f0f0",
+            color: activeTab === "temporal" ? "white" : "black",
+            border: "none",
+            padding: "0.5rem 1rem",
+            marginRight: "0.5rem",
+            cursor: "pointer",
+            borderRadius: "4px",
+          }}
+        >
+          Temporal
+        </button>
+        <button
+          onClick={() => setActiveTab("timeline")}
+          style={{
+            backgroundColor: activeTab === "timeline" ? "#007BFF" : "#f0f0f0",
+            color: activeTab === "timeline" ? "white" : "black",
+            border: "none",
+            padding: "0.5rem 1rem",
+            marginRight: "0.5rem",
+            cursor: "pointer",
+            borderRadius: "4px",
+          }}
+        >
+          Timeline
+        </button>
+        <button
+          onClick={() => setActiveTab("causation")}
+          style={{
+            backgroundColor: activeTab === "causation" ? "#007BFF" : "#f0f0f0",
+            color: activeTab === "causation" ? "white" : "black",
+            border: "none",
+            padding: "0.5rem 1rem",
+            marginRight: "0.5rem",
+            cursor: "pointer",
+            borderRadius: "4px",
+          }}
+        >
+          Causation
+        </button>
+        <button
+          onClick={() => setActiveTab("entity-relations")}
+          style={{
+            backgroundColor: activeTab === "entity-relations" ? "#007BFF" : "#f0f0f0",
+            color: activeTab === "entity-relations" ? "white" : "black",
+            border: "none",
+            padding: "0.5rem 1rem",
+            marginRight: "0.5rem",
+            cursor: "pointer",
+            borderRadius: "4px",
+          }}
+        >
           Entity Relations
         </button>
-      </nav>
-      {renderContent()}
+        <button
+          onClick={() => setActiveTab("dictionary-plus")}
+          style={{
+            backgroundColor: activeTab === "dictionary-plus" ? "#007BFF" : "#f0f0f0",
+            color: activeTab === "dictionary-plus" ? "white" : "black",
+            border: "none",
+            padding: "0.5rem 1rem",
+            marginRight: "0.5rem",
+            cursor: "pointer",
+            borderRadius: "4px",
+          }}
+        >
+          Dictionary+
+        </button>
+      </div>
+
+      <div>
+        {activeTab === "summary" && renderSummaryTab()}
+        {activeTab === "entities" && renderEntitiesTab()}
+        {activeTab === "events" && renderEventsTab()}
+        {activeTab === "temporal" && renderTemporalTab()}
+        {activeTab === "timeline" && <TimelineTab analysisData={analysisData} />}
+        {activeTab === "causation" && <CausationGraph analysisData={analysisData} />}
+        {activeTab === "entity-relations" && <EntityRelationsGraph analysisData={analysisData} />}
+        {activeTab === "dictionary-plus" && <DictionaryPlusTab analysisData={analysisData} />}
+      </div>
     </div>
   );
 }

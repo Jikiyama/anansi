@@ -29,7 +29,13 @@ function App() {
         }),
       });
       const data = await response.json();
-      setAnalysisData(data);
+      
+      // Include the original input text and language in the analysis data
+      setAnalysisData({
+        ...data,
+        original_text: inputText,
+        language: language
+      });
     } catch (error) {
       console.error("Error during analysis:", error);
     } finally {

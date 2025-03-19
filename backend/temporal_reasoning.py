@@ -309,3 +309,87 @@ Here is the text to analyze:
         }
     print(analysis_json)
     return analysis_json
+
+def analyze_parts_of_speech(input_text: str):
+    """
+    Analyzes the input text using OpenAI to identify part of speech for each token.
+    
+    :param input_text: The text to analyze
+    :return: A Python dict containing the parts of speech for each token
+    """
+    instructions = """
+    For the following text, produce a json with an array of the part of speech of every token in this fashion:
+    
+    {
+      "parts_of_speech": [
+        {
+          "token": "word1",
+          "tokenId": 0,
+          "partOfSpeech": "Pronoun"
+        },
+        {
+          "token": "word2",
+          "tokenId": 1,
+          "partOfSpeech": "Verb"
+        },
+        ...
+      ]
+    }
+    
+    Use the following part of speech categories: Noun, Proper Noun, Pronoun, Verb, Adjective, Adverb, Preposition, Conjunction, Interjection, Article, Numeral, Determiner, Auxiliary Verb, Particle, Punctuation.
+    
+    Here is the input text:
+    """
+    
+    instructions = instructions + f"\n{input_text}\n"
+    
+    client = OpenAI(api_key='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')
+    response = client.chat.completions.create(
+        model="gpt-4o-mini",  # Using a cheaper model as suggested
+        messages=[{"role": "user", "content": instructions}]
+    )
+    
+    raw_answer = response.choices[0].message.content.strip()
+    raw_answer = raw_answer.replace("```json", "").replace("```", "")
+    final_json_str = raw_answer.strip()
+    
+    try:
+        analysis_json = json.loads(final_json_str)
+    except json.JSONDecodeError:
+        analysis_json = {
+            "parts_of_speech": [],
+            "error": "JSON parsing failed. Raw output was:\n" + final_json_str
+        }
+    
+    return analysis_json
+
+def analyze_word_morphology(word: str, language: str):
+    """
+    Performs morphological analysis on a specific word.
+    
+    :param word: The word to analyze
+    :param language: The language of the word
+    :return: A Python dict containing the morphological analysis
+    """
+    instructions = f"""
+    Can you help me? I would like for you to do morphological analysis in the following {language} word:
+    
+    {word}
+    
+    Provide the response in a sentence like this:
+    "This is a verb, in this tense, in this voice, etc...."
+    "This is a noun that means ...." (in some languages, specify if the noun is using the masculine or feminine form)
+    """
+    
+    client = OpenAI(api_key='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')
+    response = client.chat.completions.create(
+        model="gpt-4o-mini",  # Using a cheaper model as suggested
+        messages=[{"role": "user", "content": instructions}]
+    )
+    
+    analysis = response.choices[0].message.content.strip()
+    
+    return {
+        "word": word,
+        "analysis": analysis
+    }

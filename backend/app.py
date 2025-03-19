@@ -5,6 +5,9 @@ from flask_cors import CORS
 from temporal_reasoning import analyze_text_events
 from temporal_reasoning import analyze_text_causation
 from temporal_reasoning import analyze_text_entities
+from temporal_reasoning import analyze_parts_of_speech
+from temporal_reasoning import analyze_word_morphology
+
 app = Flask(__name__)
 CORS(app)  # Allow CORS so that the React app can fetch from a different port or domain.
 
@@ -34,6 +37,7 @@ def analyze():
     results = analyze_text_events(input_text, doc_date_string, language)
     causation_analysis = analyze_text_causation(input_text, language)
     entity_relations = analyze_text_entities(input_text, language)
+    
     # Merge the two JSON objects into a unified structure
     unified_json = {
         "events": results.get("events", []),
@@ -48,6 +52,38 @@ def analyze():
     }
 
     return jsonify(unified_json)
+
+@app.route('/analyze_pos', methods=['POST'])
+def analyze_pos():
+    """
+    Receives a POST with:
+      - input_text
+    
+    Uses analyze_parts_of_speech to get the part of speech for each token.
+    """
+    input_text = request.form.get('input_text', '')
+    
+    # Perform the analysis
+    results = analyze_parts_of_speech(input_text)
+    
+    return jsonify(results)
+
+@app.route('/analyze_morphology', methods=['POST'])
+def analyze_morphology():
+    """
+    Receives a POST with:
+      - word
+      - language
+    
+    Uses analyze_word_morphology to get detailed morphological analysis for a word.
+    """
+    word = request.form.get('word', '')
+    language = request.form.get('language', 'English')
+    
+    # Perform the analysis
+    results = analyze_word_morphology(word, language)
+    
+    return jsonify(results)
 
 if __name__ == '__main__':
     # Host on 0.0.0.0 (accessible externally), port 5001
