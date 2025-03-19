@@ -7,6 +7,9 @@ import DictionaryPlusTab from "./DictionaryPlusTab.jsx"; // <-- NEW IMPORT
 function AnalysisTabs({ analysisData }) {
   const [activeTab, setActiveTab] = useState("summary");
 
+  // Adding this to debug if analysisData is valid
+  console.log("Full Analysis Data:", analysisData);
+
   const renderSummaryTab = () => {
     return (
       <div>
@@ -180,12 +183,16 @@ function AnalysisTabs({ analysisData }) {
   };
 
   const renderTimelineTab = () => {
-    return <TimelineTab timelineData={analysisData.timeline_of_events} />;
+    const timelineData = analysisData.timeline_of_events || [];
+    console.log("Timeline Tab Data:", timelineData);
+    return <TimelineTab timelineData={timelineData} />;
   };
 
   const renderCausationTab = () => {
-    // Get causation data from the unified JSON
-    const { events_causation, causation_relations } = analysisData;
+    // Get causation data from the unified JSON, providing defaults if undefined
+    const events_causation = analysisData.events_causation || [];
+    const causation_relations = analysisData.causation_relations || [];
+    console.log("Causation Tab Data:", events_causation, causation_relations);
 
     return (
       <div>
@@ -198,9 +205,10 @@ function AnalysisTabs({ analysisData }) {
     );
   };
 
-  // NEW: Renders the Entity Relations tab
+  // Renders the Entity Relations tab
   const renderEntityRelationsTab = () => {
-    const { entity_relations } = analysisData;
+    const entity_relations = analysisData.entity_relations || [];
+    console.log("Entity Relations Tab Data:", entity_relations);
     return (
       <div>
         <h3>Entity Relations</h3>
@@ -358,9 +366,9 @@ function AnalysisTabs({ analysisData }) {
         {activeTab === "entities" && renderEntitiesTab()}
         {activeTab === "events" && renderEventsTab()}
         {activeTab === "temporal" && renderTemporalTab()}
-        {activeTab === "timeline" && <TimelineTab analysisData={analysisData} />}
-        {activeTab === "causation" && <CausationGraph analysisData={analysisData} />}
-        {activeTab === "entity-relations" && <EntityRelationsGraph analysisData={analysisData} />}
+        {activeTab === "timeline" && renderTimelineTab()}
+        {activeTab === "causation" && renderCausationTab()}
+        {activeTab === "entity-relations" && renderEntityRelationsTab()}
         {activeTab === "dictionary-plus" && <DictionaryPlusTab analysisData={analysisData} />}
       </div>
     </div>

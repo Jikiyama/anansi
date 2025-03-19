@@ -2,6 +2,8 @@ import React from "react";
 import { Chrono } from "react-chrono";
 
 function TimelineTab({ timelineData }) {
+  console.log("TimelineTab component received data:", timelineData);
+  
   if (!timelineData || !Array.isArray(timelineData) || timelineData.length === 0) {
     return <p>No timeline data found</p>;
   }

@@ -13,6 +13,8 @@ import ForceGraph2D from 'react-force-graph-2d';
  *  ]
  */
 export default function EntityRelationsGraph({ data }) {
+  console.log("EntityRelationsGraph component received data:", data);
+  
   // Convert "entity_relations" array into { nodes: [...], links: [...] } format
   const graphData = useMemo(() => {
     if (!data || data.length === 0) {

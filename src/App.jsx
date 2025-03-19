@@ -30,6 +30,12 @@ function App() {
       });
       const data = await response.json();
       
+      // Debug log to see what's coming from the API
+      console.log("API Response:", data);
+      console.log("Timeline data:", data.timeline_of_events);
+      console.log("Causation data:", data.events_causation, data.causation_relations);
+      console.log("Entity relations:", data.entity_relations);
+      
       // Include the original input text and language in the analysis data
       setAnalysisData({
         ...data,

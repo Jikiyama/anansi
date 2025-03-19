@@ -2,8 +2,14 @@ import React from "react";
 import ForceGraph2D from "react-force-graph-2d";
 
 const CausationGraph = ({ eventsCausation, causationRelations }) => {
+  console.log("CausationGraph component received data:", { eventsCausation, causationRelations });
+  
+  // Add default values if the props are undefined
+  const events = eventsCausation || [];
+  const relations = causationRelations || [];
+  
   // If no causation relations, do nothing (or show a placeholder message)
-  if (!causationRelations || causationRelations.length === 0) {
+  if (!relations.length) {
     return <div>No causation relations found.</div>;
   }
 
@@ -11,12 +17,12 @@ const CausationGraph = ({ eventsCausation, causationRelations }) => {
   // Also add any nodes referenced in the causation relations that might be missing
   const nodesMap = new Map();
 
-  eventsCausation.forEach((event, index) => {
+  events.forEach((event, index) => {
     const id = event.occurrence_summary || `event-${index}`;
     nodesMap.set(id, { id, label: event.occurrence_summary });
   });
 
-  causationRelations.forEach((relation) => {
+  relations.forEach((relation) => {
     const { source_occurrence_summary, target_occurrence_summary } = relation;
     if (!nodesMap.has(source_occurrence_summary)) {
       nodesMap.set(source_occurrence_summary, {
@@ -33,7 +39,7 @@ const CausationGraph = ({ eventsCausation, causationRelations }) => {
   });
 
   const nodes = Array.from(nodesMap.values());
-  const links = causationRelations.map((relation, index) => ({
+  const links = relations.map((relation, index) => ({
     source: relation.source_occurrence_summary,
     target: relation.target_occurrence_summary,
     id: index,
