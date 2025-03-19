@@ -1,11 +1,8 @@
-import React, { useState, useRef, useCallback, useEffect } from "react";
+import React from "react";
 import ForceGraph2D from "react-force-graph-2d";
 
 const CausationGraph = ({ eventsCausation, causationRelations }) => {
   console.log("CausationGraph component received data:", { eventsCausation, causationRelations });
-  const [hoveredLink, setHoveredLink] = useState(null);
-  const [tooltipPos, setTooltipPos] = useState({ x: 0, y: 0, visible: false });
-  const graphRef = useRef();
   
   // Add default values if the props are undefined
   const events = eventsCausation || [];
@@ -15,67 +12,6 @@ const CausationGraph = ({ eventsCausation, causationRelations }) => {
   if (!relations.length) {
     return <div>No causation relations found.</div>;
   }
-
-  // Mouse move handler to track cursor position
-  const handleMouseMove = useCallback((event) => {
-    const containerRect = document.getElementById('causation-graph-container').getBoundingClientRect();
-    setTooltipPos({
-      x: event.clientX - containerRect.left,
-      y: event.clientY - containerRect.top,
-      visible: !!hoveredLink
-    });
-  }, [hoveredLink]);
-
-  // Handle link hover
-  const handleLinkHover = useCallback(link => {
-    setHoveredLink(link);
-    
-    // Set cursor to pointer when hovering over a link
-    const container = document.getElementById('causation-graph-container');
-    container.style.cursor = link ? 'pointer' : 'default';
-    
-    // If no link is hovered, hide the tooltip
-    if (!link) {
-      setTooltipPos(prev => ({ ...prev, visible: false }));
-    }
-    
-    // Re-render the graph
-    if (graphRef.current) {
-      graphRef.current.refresh();
-    }
-  }, []);
-
-  // Format tooltip for links - return empty to use our custom tooltip
-  const getLinkTooltip = useCallback(() => {
-    return '';
-  }, []);
-
-  // Effect to add and remove the mousemove listener
-  useEffect(() => {
-    const container = document.getElementById('causation-graph-container');
-    if (container) {
-      container.addEventListener('mousemove', handleMouseMove);
-      
-      // Ensure hover state is reset when leaving the container
-      container.addEventListener('mouseleave', () => {
-        setHoveredLink(null);
-        setTooltipPos(prev => ({ ...prev, visible: false }));
-        if (graphRef.current) {
-          graphRef.current.refresh();
-        }
-      });
-    }
-    
-    return () => {
-      if (container) {
-        container.removeEventListener('mousemove', handleMouseMove);
-        container.removeEventListener('mouseleave', () => {
-          setHoveredLink(null);
-          setTooltipPos(prev => ({ ...prev, visible: false }));
-        });
-      }
-    };
-  }, [handleMouseMove]);
 
   // Build nodes from eventsCausation (using occurrence_summary as the node id)
   // Also add any nodes referenced in the causation relations that might be missing
@@ -113,116 +49,50 @@ const CausationGraph = ({ eventsCausation, causationRelations }) => {
     <div>
       <div style={{ marginBottom: '10px' }}>
         <h3>Causation Graph</h3>
-        <p><b>Hover over the arrows to see the causal relationships.</b> This graph shows how events cause other events.</p>
+        <p>This graph shows how events cause other events. The direction of the arrow indicates causation.</p>
       </div>
       <div 
-        id="causation-graph-container"
         style={{ 
           width: '800px', 
           height: '600px', 
-          border: '1px solid #ccc',
-          position: 'relative'
+          border: '1px solid #ccc'
         }}
       >
-        {/* Custom tooltip that follows the mouse */}
-        {tooltipPos.visible && hoveredLink && (
-          <div style={{
-            position: 'absolute',
-            left: `${tooltipPos.x + 10}px`,
-            top: `${tooltipPos.y + 10}px`,
-            backgroundColor: 'rgba(255, 255, 255, 0.9)',
-            padding: '5px 8px',
-            borderRadius: '4px',
-            boxShadow: '0 2px 5px rgba(0,0,0,0.2)',
-            border: '1px solid #FF6B6B',
-            zIndex: 999,
-            maxWidth: '250px',
-            fontSize: '14px',
-            pointerEvents: 'none', // Ensure it doesn't interfere with mouse events
-          }}>
-            <b>{hoveredLink.source.id || hoveredLink.source}</b> 
-            <span style={{ color: '#FF6B6B', fontWeight: 'bold' }}> CAUSES </span>
-            <b>{hoveredLink.target.id || hoveredLink.target}</b>
-          </div>
-        )}
-        
         <ForceGraph2D
-          ref={graphRef}
           graphData={{ nodes, links }}
           nodeAutoColorBy="id"
           
-          // Make links thicker and colorful - highlight hovered link
-          linkWidth={link => link === hoveredLink ? 4 : 2}
-          linkColor={link => link === hoveredLink ? '#ff9900' : '#FF6B6B'}
+          // Set consistent link styling
+          linkWidth={2}
+          linkColor="#FF6B6B"
           
           // Enable directed arrows
           linkDirectionalArrowLength={6}
           linkDirectionalArrowRelPos={1}
           
           // Add particles to visualize direction of causation
-          linkDirectionalParticles={link => link === hoveredLink ? 4 : 2}
+          linkDirectionalParticles={2}
           linkDirectionalParticleSpeed={0.02}
-          linkDirectionalParticleWidth={link => link === hoveredLink ? 5 : 3}
-          linkDirectionalParticleColor={link => link === hoveredLink ? '#ff9900' : '#FF6B6B'}
-
-          // Handle hover events
-          onLinkHover={handleLinkHover}
-          linkLabel={getLinkTooltip}
-          linkCanvasObjectMode={() => 'after'}
+          linkDirectionalParticleWidth={3}
+          linkDirectionalParticleColor="#FF6B6B"
           
-          // Custom link drawing to highlight relationships
-          linkCanvasObject={(link, ctx, globalScale) => {
-            if (link === hoveredLink) {
-              // Draw a highlight around the link
-              const start = link.source;
-              const end = link.target;
-              
-              // Calculate link midpoint for relation text
-              const x = start.x + (end.x - start.x) / 2;
-              const y = start.y + (end.y - start.y) / 2;
-              
-              // Draw a background for the relation text
-              const fontSize = 18 / globalScale;
-              ctx.font = `bold ${fontSize}px Sans-Serif`;
-              const textWidth = ctx.measureText("CAUSES").width;
-              const bckgDimensions = [textWidth, fontSize].map(n => n + 12);
-              
-              ctx.fillStyle = 'rgba(255, 153, 0, 0.2)';
-              ctx.fillRect(
-                x - bckgDimensions[0]/2, 
-                y - bckgDimensions[1]/2, 
-                bckgDimensions[0], 
-                bckgDimensions[1]
-              );
-              
-              // Draw CAUSES text
-              ctx.fillStyle = '#ff9900';
-              ctx.textAlign = 'center';
-              ctx.textBaseline = 'middle';
-              ctx.fillText("CAUSES", x, y);
-              
-              // Draw a border around the background
-              ctx.strokeStyle = '#ff9900';
-              ctx.lineWidth = 2 / globalScale;
-              ctx.strokeRect(
-                x - bckgDimensions[0]/2, 
-                y - bckgDimensions[1]/2, 
-                bckgDimensions[0], 
-                bckgDimensions[1]
-              );
-            }
-          }}
+          // Add "CAUSES" text to the links
+          linkDirectionalText={() => "CAUSES"}
+          linkDirectionalTextColor="black"
+          linkDirectionalTextOffset={-10}
+          linkDirectionalTextSize={14}
+          linkDirectionalTextMode="intermediate"
 
           // Custom-draw each node + text in nodeCanvasObject:
           nodeCanvasObject={(node, ctx, globalScale) => {
             const label = node.label;
-            const fontSize = 14 / globalScale;  // Slightly larger font
+            const fontSize = 14 / globalScale;
             ctx.font = `bold ${fontSize}px Sans-Serif`;
 
             // Draw circle for the node
             ctx.beginPath();
-            ctx.arc(node.x, node.y, 6, 0, 2 * Math.PI, false);  // Slightly larger circle
-            ctx.fillStyle = node.color || '#6A0DAD';  // Default to purple if no color
+            ctx.arc(node.x, node.y, 6, 0, 2 * Math.PI, false);
+            ctx.fillStyle = node.color || '#6A0DAD';
             ctx.fill();
             
             // Add a white border
@@ -252,7 +122,7 @@ const CausationGraph = ({ eventsCausation, causationRelations }) => {
       <div style={{ marginTop: '10px', border: '1px solid #ddd', padding: '8px', borderRadius: '4px' }}>
         <h4 style={{ margin: '0 0 8px 0' }}>How to use this graph:</h4>
         <ul style={{ margin: 0, paddingLeft: '20px' }}>
-          <li>Hover over the arrows to see the causal relationships</li>
+          <li>The text "CAUSES" shows the causal relationship between events</li>
           <li>The direction of the arrow shows which event causes another</li>
           <li>Drag nodes to rearrange the graph</li>
           <li>Scroll to zoom in/out</li>
