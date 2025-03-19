@@ -66,7 +66,7 @@ Deliver a response like this
     # Log the prompt
     log_to_file("analyze_text_entities", instructions, "PROMPT")
     
-    client = OpenAI(api_key='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')
+    client = OpenAI(api_key=os.getenv("OPENAI_API_KEY"))
     response = client.chat.completions.create(
         model="o3-mini",
         messages=[{"role": "user", "content": instructions}]
@@ -133,7 +133,7 @@ So in this case, Trump Imposes Tariffs on China has a causation relation directe
     # Log the prompt
     log_to_file("analyze_text_causation", instructions, "PROMPT")
     
-    client = OpenAI(api_key='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')
+    client = OpenAI(api_key=os.getenv("OPENAI_API_KEY"))
     response = client.chat.completions.create(
         model="o3-mini",
         messages=[{"role": "user", "content": instructions}]
@@ -315,7 +315,7 @@ Here is the text to analyze:
 
     # 3) Call the ChatGPT o3-mini endpoint using the OpenAI library
     #    (This is just an example; adapt to your own usage)
-    client = OpenAI(api_key='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')
+    client = OpenAI(api_key=os.getenv("OPENAI_API_KEY"))
     response = client.chat.completions.create(
         model="o3-mini",
         messages=[{"role": "user", "content": full_prompt}]
@@ -404,7 +404,7 @@ def analyze_parts_of_speech(input_text: str):
     # Log the prompt
     log_to_file("analyze_parts_of_speech", instructions, "PROMPT")
     
-    client = OpenAI(api_key='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')
+    client = OpenAI(api_key=os.getenv("OPENAI_API_KEY"))
     response = client.chat.completions.create(
         model="gpt-4o-mini",  # Using a cheaper model as suggested
         messages=[{"role": "user", "content": instructions}]
@@ -451,7 +451,7 @@ def analyze_word_morphology(word: str, language: str):
     # Log the prompt
     log_to_file("analyze_word_morphology", instructions, "PROMPT")
     
-    client = OpenAI(api_key='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')
+    client = OpenAI(api_key=os.getenv("OPENAI_API_KEY"))
     response = client.chat.completions.create(
         model="gpt-4o-mini",  # Using a cheaper model as suggested
         messages=[{"role": "user", "content": instructions}]
