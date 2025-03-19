@@ -15,6 +15,7 @@ import ForceGraph2D from 'react-force-graph-2d';
 export default function EntityRelationsGraph({ data }) {
   console.log("EntityRelationsGraph component received data:", data);
   const [hoveredLink, setHoveredLink] = useState(null);
+  const [tooltipPos, setTooltipPos] = useState({ x: 0, y: 0, visible: false });
   const graphRef = useRef();
   
   // Convert "entity_relations" array into { nodes: [...], links: [...] } format
@@ -46,11 +47,27 @@ export default function EntityRelationsGraph({ data }) {
     return { nodes, links };
   }, [data]);
 
+  // Mouse move handler to track cursor position
+  const handleMouseMove = useCallback((event) => {
+    const containerRect = document.getElementById('entity-graph-container').getBoundingClientRect();
+    setTooltipPos({
+      x: event.clientX - containerRect.left,
+      y: event.clientY - containerRect.top,
+      visible: !!hoveredLink
+    });
+  }, [hoveredLink]);
+
   const handleLinkHover = useCallback(link => {
     setHoveredLink(link);
     
     // Set cursor to pointer when hovering over a link
-    document.getElementById('entity-graph-container').style.cursor = link ? 'pointer' : 'default';
+    const container = document.getElementById('entity-graph-container');
+    container.style.cursor = link ? 'pointer' : 'default';
+    
+    // If no link is hovered, hide the tooltip
+    if (!link) {
+      setTooltipPos(prev => ({ ...prev, visible: false }));
+    }
     
     // Re-render the graph
     if (graphRef.current) {
@@ -59,10 +76,37 @@ export default function EntityRelationsGraph({ data }) {
   }, []);
 
   // Format relation text for tooltip
-  const getLinkTooltip = useCallback(link => {
-    if (!link) return '';
-    return `${link.source.id || link.source} ${link.relation} ${link.target.id || link.target}`;
+  const getLinkTooltip = useCallback(() => {
+    // Return empty tooltip to disable the default one
+    return '';
   }, []);
+
+  // Effect to add and remove the mousemove listener
+  React.useEffect(() => {
+    const container = document.getElementById('entity-graph-container');
+    if (container) {
+      container.addEventListener('mousemove', handleMouseMove);
+      
+      // Ensure hover state is reset when leaving the container
+      container.addEventListener('mouseleave', () => {
+        setHoveredLink(null);
+        setTooltipPos(prev => ({ ...prev, visible: false }));
+        if (graphRef.current) {
+          graphRef.current.refresh();
+        }
+      });
+    }
+    
+    return () => {
+      if (container) {
+        container.removeEventListener('mousemove', handleMouseMove);
+        container.removeEventListener('mouseleave', () => {
+          setHoveredLink(null);
+          setTooltipPos(prev => ({ ...prev, visible: false }));
+        });
+      }
+    };
+  }, [handleMouseMove]);
 
   if (!graphData.nodes.length) {
     return <p>No entity relations found.</p>;
@@ -76,17 +120,6 @@ export default function EntityRelationsGraph({ data }) {
           <b>Hover over the arrows to see the relationship between entities.</b> 
           The relationship (e.g., "{data?.[0]?.relation || 'attacked'}") describes how entities interact.
         </p>
-        {hoveredLink && (
-          <div style={{ 
-            backgroundColor: '#f0f8ff', 
-            padding: '8px', 
-            borderRadius: '4px',
-            border: '1px solid #007BFF',
-            marginTop: '10px'
-          }}>
-            <b>Highlighted Relationship:</b> {hoveredLink.source.id || hoveredLink.source} <span style={{ color: '#007BFF', fontWeight: 'bold' }}>{hoveredLink.relation}</span> {hoveredLink.target.id || hoveredLink.target}
-          </div>
-        )}
       </div>
       <div 
         id="entity-graph-container"
@@ -97,6 +130,28 @@ export default function EntityRelationsGraph({ data }) {
           position: 'relative' 
         }}
       >
+        {/* Custom tooltip that follows the mouse */}
+        {tooltipPos.visible && hoveredLink && (
+          <div style={{
+            position: 'absolute',
+            left: `${tooltipPos.x + 10}px`,
+            top: `${tooltipPos.y + 10}px`,
+            backgroundColor: 'rgba(255, 255, 255, 0.9)',
+            padding: '5px 8px',
+            borderRadius: '4px',
+            boxShadow: '0 2px 5px rgba(0,0,0,0.2)',
+            border: '1px solid #007BFF',
+            zIndex: 999,
+            maxWidth: '250px',
+            fontSize: '14px',
+            pointerEvents: 'none', // Ensure it doesn't interfere with mouse events
+          }}>
+            <b>{hoveredLink.source.id || hoveredLink.source}</b> 
+            <span style={{ color: '#007BFF', fontWeight: 'bold' }}> {hoveredLink.relation} </span>
+            <b>{hoveredLink.target.id || hoveredLink.target}</b>
+          </div>
+        )}
+        
         <ForceGraph2D
           ref={graphRef}
           graphData={graphData}

@@ -1,9 +1,10 @@
-import React, { useState, useRef, useCallback } from "react";
+import React, { useState, useRef, useCallback, useEffect } from "react";
 import ForceGraph2D from "react-force-graph-2d";
 
 const CausationGraph = ({ eventsCausation, causationRelations }) => {
   console.log("CausationGraph component received data:", { eventsCausation, causationRelations });
   const [hoveredLink, setHoveredLink] = useState(null);
+  const [tooltipPos, setTooltipPos] = useState({ x: 0, y: 0, visible: false });
   const graphRef = useRef();
   
   // Add default values if the props are undefined
@@ -15,12 +16,28 @@ const CausationGraph = ({ eventsCausation, causationRelations }) => {
     return <div>No causation relations found.</div>;
   }
 
+  // Mouse move handler to track cursor position
+  const handleMouseMove = useCallback((event) => {
+    const containerRect = document.getElementById('causation-graph-container').getBoundingClientRect();
+    setTooltipPos({
+      x: event.clientX - containerRect.left,
+      y: event.clientY - containerRect.top,
+      visible: !!hoveredLink
+    });
+  }, [hoveredLink]);
+
   // Handle link hover
   const handleLinkHover = useCallback(link => {
     setHoveredLink(link);
     
     // Set cursor to pointer when hovering over a link
-    document.getElementById('causation-graph-container').style.cursor = link ? 'pointer' : 'default';
+    const container = document.getElementById('causation-graph-container');
+    container.style.cursor = link ? 'pointer' : 'default';
+    
+    // If no link is hovered, hide the tooltip
+    if (!link) {
+      setTooltipPos(prev => ({ ...prev, visible: false }));
+    }
     
     // Re-render the graph
     if (graphRef.current) {
@@ -28,11 +45,37 @@ const CausationGraph = ({ eventsCausation, causationRelations }) => {
     }
   }, []);
 
-  // Format tooltip for links
-  const getLinkTooltip = useCallback(link => {
-    if (!link) return '';
-    return `${link.source.id || link.source} CAUSES ${link.target.id || link.target}`;
+  // Format tooltip for links - return empty to use our custom tooltip
+  const getLinkTooltip = useCallback(() => {
+    return '';
   }, []);
+
+  // Effect to add and remove the mousemove listener
+  useEffect(() => {
+    const container = document.getElementById('causation-graph-container');
+    if (container) {
+      container.addEventListener('mousemove', handleMouseMove);
+      
+      // Ensure hover state is reset when leaving the container
+      container.addEventListener('mouseleave', () => {
+        setHoveredLink(null);
+        setTooltipPos(prev => ({ ...prev, visible: false }));
+        if (graphRef.current) {
+          graphRef.current.refresh();
+        }
+      });
+    }
+    
+    return () => {
+      if (container) {
+        container.removeEventListener('mousemove', handleMouseMove);
+        container.removeEventListener('mouseleave', () => {
+          setHoveredLink(null);
+          setTooltipPos(prev => ({ ...prev, visible: false }));
+        });
+      }
+    };
+  }, [handleMouseMove]);
 
   // Build nodes from eventsCausation (using occurrence_summary as the node id)
   // Also add any nodes referenced in the causation relations that might be missing
@@ -71,17 +114,6 @@ const CausationGraph = ({ eventsCausation, causationRelations }) => {
       <div style={{ marginBottom: '10px' }}>
         <h3>Causation Graph</h3>
         <p><b>Hover over the arrows to see the causal relationships.</b> This graph shows how events cause other events.</p>
-        {hoveredLink && (
-          <div style={{ 
-            backgroundColor: '#fff0f0', 
-            padding: '8px', 
-            borderRadius: '4px',
-            border: '1px solid #FF6B6B',
-            marginTop: '10px'
-          }}>
-            <b>Highlighted Causation:</b> {hoveredLink.source.id || hoveredLink.source} <span style={{ color: '#FF6B6B', fontWeight: 'bold' }}>CAUSES</span> {hoveredLink.target.id || hoveredLink.target}
-          </div>
-        )}
       </div>
       <div 
         id="causation-graph-container"
@@ -92,6 +124,28 @@ const CausationGraph = ({ eventsCausation, causationRelations }) => {
           position: 'relative'
         }}
       >
+        {/* Custom tooltip that follows the mouse */}
+        {tooltipPos.visible && hoveredLink && (
+          <div style={{
+            position: 'absolute',
+            left: `${tooltipPos.x + 10}px`,
+            top: `${tooltipPos.y + 10}px`,
+            backgroundColor: 'rgba(255, 255, 255, 0.9)',
+            padding: '5px 8px',
+            borderRadius: '4px',
+            boxShadow: '0 2px 5px rgba(0,0,0,0.2)',
+            border: '1px solid #FF6B6B',
+            zIndex: 999,
+            maxWidth: '250px',
+            fontSize: '14px',
+            pointerEvents: 'none', // Ensure it doesn't interfere with mouse events
+          }}>
+            <b>{hoveredLink.source.id || hoveredLink.source}</b> 
+            <span style={{ color: '#FF6B6B', fontWeight: 'bold' }}> CAUSES </span>
+            <b>{hoveredLink.target.id || hoveredLink.target}</b>
+          </div>
+        )}
+        
         <ForceGraph2D
           ref={graphRef}
           graphData={{ nodes, links }}
