@@ -3,3 +3,115 @@
 > vite --host --port 5174
 
 sh: line 1: /home/ec2-user/ANANSI/anansi/node_modules/.bin/vite: Permission denied
+
+> text-analyzer-frontend@0.0.1 dev
+> vite 5174
+
+(!) Could not auto-determine entry point from rollupOptions or html files and there are no explicit optimizeDeps.include patterns. Skipping dependency pre-bundling.
+
+  VITE v4.5.9  ready in 260 ms
+
+  ➜  Local:   http://localhost:5173/
+  ➜  Network: use --host to expose
+
+> text-analyzer-frontend@0.0.1 dev
+> vite 5174
+
+(!) Could not auto-determine entry point from rollupOptions or html files and there are no explicit optimizeDeps.include patterns. Skipping dependency pre-bundling.
+
+  VITE v4.5.9  ready in 333 ms
+
+  ➜  Local:   http://localhost:5173/
+  ➜  Network: use --host to expose
+
+> text-analyzer-frontend@0.0.1 dev
+> vite 5174
+
+(!) Could not auto-determine entry point from rollupOptions or html files and there are no explicit optimizeDeps.include patterns. Skipping dependency pre-bundling.
+
+  VITE v4.5.9  ready in 283 ms
+
+  ➜  Local:   http://localhost:5173/
+  ➜  Network: use --host to expose
+
+> text-analyzer-frontend@0.0.1 dev
+> vite 5174
+
+(!) Could not auto-determine entry point from rollupOptions or html files and there are no explicit optimizeDeps.include patterns. Skipping dependency pre-bundling.
+
+  VITE v4.5.9  ready in 290 ms
+
+  ➜  Local:   http://localhost:5173/
+  ➜  Network: use --host to expose
+
+> text-analyzer-frontend@0.0.1 dev
+> vite 5174
+
+(!) Could not auto-determine entry point from rollupOptions or html files and there are no explicit optimizeDeps.include patterns. Skipping dependency pre-bundling.
+
+  VITE v4.5.9  ready in 309 ms
+
+  ➜  Local:   http://localhost:5173/
+  ➜  Network: use --host to expose
+
+> text-analyzer-frontend@0.0.1 dev
+> vite 5174
+
+(!) Could not auto-determine entry point from rollupOptions or html files and there are no explicit optimizeDeps.include patterns. Skipping dependency pre-bundling.
+
+  VITE v4.5.9  ready in 295 ms
+
+  ➜  Local:   http://localhost:5173/
+  ➜  Network: use --host to expose
+
+> text-analyzer-frontend@0.0.1 dev
+> vite 5174
+
+(!) Could not auto-determine entry point from rollupOptions or html files and there are no explicit optimizeDeps.include patterns. Skipping dependency pre-bundling.
+
+  VITE v4.5.9  ready in 288 ms
+
+  ➜  Local:   http://localhost:5173/
+  ➜  Network: use --host to expose
+
+> text-analyzer-frontend@0.0.1 dev
+> vite 5174
+
+(!) Could not auto-determine entry point from rollupOptions or html files and there are no explicit optimizeDeps.include patterns. Skipping dependency pre-bundling.
+
+  VITE v4.5.9  ready in 302 ms
+
+  ➜  Local:   http://localhost:5173/
+  ➜  Network: use --host to expose
+
+> text-analyzer-frontend@0.0.1 dev
+> vite 5174
+
+(!) Could not auto-determine entry point from rollupOptions or html files and there are no explicit optimizeDeps.include patterns. Skipping dependency pre-bundling.
+
+  VITE v4.5.9  ready in 281 ms
+
+  ➜  Local:   http://localhost:5173/
+  ➜  Network: use --host to expose
+
+> text-analyzer-frontend@0.0.1 dev
+> vite 5174
+
+(!) Could not auto-determine entry point from rollupOptions or html files and there are no explicit optimizeDeps.include patterns. Skipping dependency pre-bundling.
+
+  VITE v4.5.9  ready in 283 ms
+
+  ➜  Local:   http://localhost:5173/
+  ➜  Network: use --host to expose
+
+> text-analyzer-frontend@0.0.1 dev
+> vite 5174
+
+Port 5173 is in use, trying another one...
+(!) Could not auto-determine entry point from rollupOptions or html files and there are no explicit optimizeDeps.include patterns. Skipping dependency pre-bundling.
+Port 5174 is in use, trying another one...
+
+  VITE v4.5.9  ready in 305 ms
+
+  ➜  Local:   http://localhost:5175/
+  ➜  Network: use --host to expose

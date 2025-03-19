@@ -1,75 +1,107 @@
 {
   "events": [
     {
-      "sentence": "Diana is rehearsing the presentation for next week with her boss Emmanuel.",
-      "event_type": "rehearsal",
-      "verb": "rehearsing",
-      "agent": "Diana",
-      "patients": "the presentation",
-      "temporal_reference": "next week",
-      "cause": "Assumed preparation for an upcoming presentation",
-      "purpose_context": "To practice and refine the presentation before its delivery"
+      "sentence": "Ayer me encontré con Migue en el trabajo, hace rato no hablábamos.",
+      "event_type": "meeting",
+      "verb": "encontré",
+      "agent": "narrator (implied)",
+      "patients": "Migue",
+      "temporal_reference": "Ayer",
+      "cause": "An unplanned or casual encounter at work",
+      "purpose_context": "Reconnecting with a coworker after a period of silence"
     },
     {
-      "sentence": "He is teaching her all the nuances of how to present it.",
-      "event_type": "instruction",
-      "verb": "teaching",
-      "agent": "Emmanuel",
-      "patients": "Diana",
-      "temporal_reference": "",
-      "cause": "Assumed need to enhance presentation skills",
-      "purpose_context": "To ensure Diana understands all the nuances of presenting"
+      "sentence": "Ayer me encontré con Migue en el trabajo, hace rato no hablábamos.",
+      "event_type": "lack of communication",
+      "verb": "hablábamos (negative context)",
+      "agent": "narrator and Migue",
+      "patients": "each other",
+      "temporal_reference": "hace rato",
+      "cause": "They had not communicated for some time (assumption)",
+      "purpose_context": "Establishing a background of infrequent communication prior to the meeting"
+    },
+    {
+      "sentence": "Hoy me recordó un dicho colombiano muy chistoso que dice: tiene más reversa un avión jajaja",
+      "event_type": "reminder",
+      "verb": "recordó",
+      "agent": "Migue (implied from previous context)",
+      "patients": "narrator",
+      "temporal_reference": "Hoy",
+      "cause": "The recent meeting may have prompted recollection (assumption)",
+      "purpose_context": "To share humor and lighten the mood"
+    },
+    {
+      "sentence": "Hoy me recordó un dicho colombiano muy chistoso que dice: tiene más reversa un avión jajaja",
+      "event_type": "communication",
+      "verb": "dice",
+      "agent": "the quoted Colombian saying (as a figure of speech)",
+      "patients": "the audience (narrator and implied others)",
+      "temporal_reference": "Hoy",
+      "cause": "Part of delivering the humorous content",
+      "purpose_context": "To convey the punchline of the humorous saying"
     }
   ],
   "named_entities": {
     "persons": [
       {
-        "entity": "Diana",
+        "entity": "Migue",
         "type": "person",
-        "description": "Employee rehearsing the presentation (assumed presenter)"
-      },
-      {
-        "entity": "Emmanuel",
-        "type": "person",
-        "description": "Diana's boss, acting as an instructor on presentation nuances"
+        "description": "A coworker encountered by the narrator"
       }
     ],
     "organizations": [],
-    "locations": [],
+    "locations": [
+      {
+        "entity": "trabajo",
+        "type": "location",
+        "description": "The workplace where the encounter took place (assumed)"
+      }
+    ],
     "institutions": [],
     "dates": [],
     "legal_terms": []
   },
   "temporal_references": [
     {
-      "reference": "next week",
-      "description": "Indicates the presentation is scheduled for the week following the current document date"
+      "reference": "Ayer",
+      "description": "Refers to the day before the document date, i.e., 2025-03-18"
+    },
+    {
+      "reference": "Hoy",
+      "description": "Refers to the document date, i.e., 2025-03-19"
+    },
+    {
+      "reference": "hace rato",
+      "description": "Indicates an unspecified period in the past before the encounter"
     }
   ],
-  "important_notes": [
-    "The analysis uses assumptions where the context is inferred, such as the cause for rehearsing and teaching being preparation for an upcoming presentation."
-  ],
+  "important_notes": [],
   "timeline_of_events": [
     {
-      "date": "2025-03-19",
+      "date": "2025-03-18",
       "events": [
         {
-          "event_summary": "Diana rehearses the presentation",
-          "event_verb": "rehearsing",
-          "temporal_reference_connection": "next week"
+          "event_summary": "The narrator met Migue at work after not speaking for a while.",
+          "event_verb": "encontré",
+          "temporal_reference_connection": "Ayer"
         }
       ]
     },
     {
-      "date": "2025-03-12",
+      "date": "2025-03-19",
       "events": [
         {
-          "event_summary": "Emmanuel teaches Diana the nuances of presenting",
-          "event_verb": "teaching",
-          "temporal_reference_connection": "No explicit temporal reference; assumed concurrent with the rehearsal process"
+          "event_summary": "Migue reminded the narrator of a humorous Colombian saying.",
+          "event_verb": "recordó",
+          "temporal_reference_connection": "Hoy"
+        },
+        {
+          "event_summary": "The humorous saying 'tiene más reversa un avión' was communicated.",
+          "event_verb": "dice",
+          "temporal_reference_connection": "Hoy"
         }
       ]
     }
   ],
-  "summary": "The text describes a scenario in which Diana is actively preparing for an upcoming presentation by rehearsing it, with guidance from her boss Emmanuel. While Diana practices her delivery for a presentation scheduled for next week, Emmanuel provides detailed instruction on the nuances of effective presentation skills. This collaborative process underscores the importance of preparation and mentorship in professional settings."
+  "summary": "The text recounts a recent encounter between the narrator and Migue at work. Yesterday, after not having spoken for a while, they met again, and today Migue reminded the narrator of a humorous Colombian saying, adding levity to their interaction."
 }
