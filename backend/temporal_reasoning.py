@@ -1,6 +1,33 @@
 # temporal_reasoning.py
 import json
+import os
+from datetime import datetime
 from openai import OpenAI
+
+
+def log_to_file(function_name, content, prefix=""):
+    """
+    Helper function to log content to a file.
+    
+    :param function_name: Name of the function (used for the filename)
+    :param content: Content to log
+    :param prefix: Optional prefix for the log entry
+    """
+    # Create logs directory if it doesn't exist
+    if not os.path.exists("logs"):
+        os.makedirs("logs")
+    
+    # Format timestamp
+    timestamp = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+    
+    # Create log filename
+    filename = f"logs/{function_name}_logs.txt"
+    
+    # Write to log file
+    with open(filename, "a", encoding="utf-8") as log_file:
+        log_file.write(f"=== {timestamp} {prefix} ===\n")
+        log_file.write(content)
+        log_file.write("\n\n")
 
 
 def analyze_text_entities(input_text : str, language : str):
@@ -35,23 +62,34 @@ Deliver a response like this
     """
     
     instructions = instructions + f"\nHere is the input text:\n{input_text}\nIMPORTANT: MAKE SURE THE OUTPUT/ANALYSIS WRITTEN TO THE JSON IS WRITTEN IN THIS LANGUAGE: {language}\n"
+    
+    # Log the prompt
+    log_to_file("analyze_text_entities", instructions, "PROMPT")
+    
     client = OpenAI(api_key='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')
     response = client.chat.completions.create(
         model="o3-mini",
         messages=[{"role": "user", "content": instructions}]
     )
-    print(response.choices[0].message.content.strip())
+    
     raw_answer = response.choices[0].message.content.strip()
+    
+    # Log the response
+    log_to_file("analyze_text_entities", raw_answer, "RESPONSE")
+    
+    print(raw_answer)
     raw_answer = raw_answer.replace("```json", "").replace("```", "")
     final_json_str = raw_answer.strip()
     print(final_json_str)
     try:
         analysis_json = json.loads(final_json_str)
     except json.JSONDecodeError:
+        error_msg = f"JSON parsing failed. Raw output was:\n{final_json_str}"
+        log_to_file("analyze_text_entities", error_msg, "ERROR")
         analysis_json = {
             "events_causation": [],
             "causation_relations": [],
-            "error": "JSON parsing failed. Raw output was:\n" + final_json_str
+            "error": error_msg
         }
     return analysis_json
 
@@ -91,23 +129,34 @@ So in this case, Trump Imposes Tariffs on China has a causation relation directe
     """
     
     instructions = instructions + f"\nHere is the input text:\n{input_text}\nIMPORTANT: MAKE SURE THE OUTPUT/ANALYSIS WRITTEN TO THE JSON IS WRITTEN IN THIS LANGUAGE: {language}\n"
+    
+    # Log the prompt
+    log_to_file("analyze_text_causation", instructions, "PROMPT")
+    
     client = OpenAI(api_key='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')
     response = client.chat.completions.create(
         model="o3-mini",
         messages=[{"role": "user", "content": instructions}]
     )
-    print(response.choices[0].message.content.strip())
+    
     raw_answer = response.choices[0].message.content.strip()
+    
+    # Log the response
+    log_to_file("analyze_text_causation", raw_answer, "RESPONSE")
+    
+    print(raw_answer)
     raw_answer = raw_answer.replace("```json", "").replace("```", "")
     final_json_str = raw_answer.strip()
     print(final_json_str)
     try:
         analysis_json = json.loads(final_json_str)
     except json.JSONDecodeError:
+        error_msg = f"JSON parsing failed. Raw output was:\n{final_json_str}"
+        log_to_file("analyze_text_causation", error_msg, "ERROR")
         analysis_json = {
             "events_causation": [],
             "causation_relations": [],
-            "error": "JSON parsing failed. Raw output was:\n" + final_json_str
+            "error": error_msg
         }
     return analysis_json
 
@@ -260,6 +309,9 @@ Here is the text to analyze:
 {input_text}
 """
     print("here is the prompt i used\n", full_prompt)
+    
+    # Log the prompt
+    log_to_file("analyze_text_events", full_prompt, "PROMPT")
 
     # 3) Call the ChatGPT o3-mini endpoint using the OpenAI library
     #    (This is just an example; adapt to your own usage)
@@ -271,6 +323,10 @@ Here is the text to analyze:
 
     # 4) Extract the model's content
     raw_answer = response.choices[0].message.content.strip()
+    
+    # Log the response
+    log_to_file("analyze_text_events", raw_answer, "RESPONSE")
+    
     raw_answer = raw_answer.replace("```json", "").replace("```", "")
     outputFile = open("answer.txt", "w")
     outputFile.write(raw_answer)
@@ -292,6 +348,8 @@ Here is the text to analyze:
     try:
         analysis_json = json.loads(final_json_str)
     except json.JSONDecodeError:
+        error_msg = f"JSON parsing failed. Raw output was:\n{final_json_str}"
+        log_to_file("analyze_text_events", error_msg, "ERROR")
         analysis_json = {
             "events": [],
             "named_entities": {
@@ -305,7 +363,7 @@ Here is the text to analyze:
             "temporal_references": [],
             "important_notes": [],
             "timeline_of_events": [],
-            "error": "JSON parsing failed. Raw output was:\n" + final_json_str
+            "error": error_msg
         }
     print(analysis_json)
     return analysis_json
@@ -343,6 +401,9 @@ def analyze_parts_of_speech(input_text: str):
     
     instructions = instructions + f"\n{input_text}\n"
     
+    # Log the prompt
+    log_to_file("analyze_parts_of_speech", instructions, "PROMPT")
+    
     client = OpenAI(api_key='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')
     response = client.chat.completions.create(
         model="gpt-4o-mini",  # Using a cheaper model as suggested
@@ -350,15 +411,21 @@ def analyze_parts_of_speech(input_text: str):
     )
     
     raw_answer = response.choices[0].message.content.strip()
+    
+    # Log the response
+    log_to_file("analyze_parts_of_speech", raw_answer, "RESPONSE")
+    
     raw_answer = raw_answer.replace("```json", "").replace("```", "")
     final_json_str = raw_answer.strip()
     
     try:
         analysis_json = json.loads(final_json_str)
     except json.JSONDecodeError:
+        error_msg = f"JSON parsing failed. Raw output was:\n{final_json_str}"
+        log_to_file("analyze_parts_of_speech", error_msg, "ERROR")
         analysis_json = {
             "parts_of_speech": [],
-            "error": "JSON parsing failed. Raw output was:\n" + final_json_str
+            "error": error_msg
         }
     
     return analysis_json
@@ -381,6 +448,9 @@ def analyze_word_morphology(word: str, language: str):
     "This is a noun that means ...." (in some languages, specify if the noun is using the masculine or feminine form)
     """
     
+    # Log the prompt
+    log_to_file("analyze_word_morphology", instructions, "PROMPT")
+    
     client = OpenAI(api_key='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')
     response = client.chat.completions.create(
         model="gpt-4o-mini",  # Using a cheaper model as suggested
@@ -388,6 +458,9 @@ def analyze_word_morphology(word: str, language: str):
     )
     
     analysis = response.choices[0].message.content.strip()
+    
+    # Log the response
+    log_to_file("analyze_word_morphology", analysis, "RESPONSE")
     
     return {
         "word": word,
