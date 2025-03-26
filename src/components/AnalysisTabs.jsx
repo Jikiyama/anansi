@@ -1,8 +1,8 @@
 import React, { useState } from "react";
 import TimelineTab from "./TimelineTab.jsx";
 import CausationGraph from "./CausationGraph.jsx";
-import EntityRelationsGraph from "./EntityRelationsGraph.jsx"; // <-- NEW IMPORT
-import DictionaryPlusTab from "./DictionaryPlusTab.jsx"; // <-- NEW IMPORT
+import EntityRelationsGraph from "./EntityRelationsGraph.jsx";
+import DictionaryPlusTab from "./DictionaryPlusTab.jsx";
 
 function AnalysisTabs({ analysisData }) {
   const [activeTab, setActiveTab] = useState("summary");
@@ -40,7 +40,6 @@ function AnalysisTabs({ analysisData }) {
             <li>No persons found</li>
           )}
         </ul>
-
         {/* Organizations */}
         <h4>Organizations</h4>
         <ul>
@@ -54,7 +53,6 @@ function AnalysisTabs({ analysisData }) {
             <li>No organizations found</li>
           )}
         </ul>
-
         {/* Locations */}
         <h4>Locations</h4>
         <ul>
@@ -68,7 +66,6 @@ function AnalysisTabs({ analysisData }) {
             <li>No locations found</li>
           )}
         </ul>
-
         {/* Institutions */}
         <h4>Institutions</h4>
         <ul>
@@ -82,7 +79,6 @@ function AnalysisTabs({ analysisData }) {
             <li>No institutions found</li>
           )}
         </ul>
-
         {/* Dates */}
         <h4>Dates</h4>
         <ul>
@@ -96,7 +92,6 @@ function AnalysisTabs({ analysisData }) {
             <li>No dates found</li>
           )}
         </ul>
-
         {/* Legal Terms */}
         <h4>Legal Terms</h4>
         <ul>
@@ -119,7 +114,6 @@ function AnalysisTabs({ analysisData }) {
     if (!events || events.length === 0) {
       return <p>No events found.</p>;
     }
-
     return (
       <div>
         <h3>Events</h3>
@@ -184,16 +178,12 @@ function AnalysisTabs({ analysisData }) {
 
   const renderTimelineTab = () => {
     const timelineData = analysisData.timeline_of_events || [];
-    console.log("Timeline Tab Data:", timelineData);
     return <TimelineTab timelineData={timelineData} />;
   };
 
   const renderCausationTab = () => {
-    // Get causation data from the unified JSON, providing defaults if undefined
     const events_causation = analysisData.events_causation || [];
     const causation_relations = analysisData.causation_relations || [];
-    console.log("Causation Tab Data:", events_causation, causation_relations);
-
     return (
       <div>
         <h3>Causation</h3>
@@ -205,16 +195,18 @@ function AnalysisTabs({ analysisData }) {
     );
   };
 
-  // Renders the Entity Relations tab
   const renderEntityRelationsTab = () => {
     const entity_relations = analysisData.entity_relations || [];
-    console.log("Entity Relations Tab Data:", entity_relations);
     return (
       <div>
         <h3>Entity Relations</h3>
         <EntityRelationsGraph data={entity_relations} />
       </div>
     );
+  };
+
+  const renderDictionaryPlusTab = () => {
+    return <DictionaryPlusTab analysisData={analysisData} />;
   };
 
   const renderContent = () => {
@@ -231,14 +223,10 @@ function AnalysisTabs({ analysisData }) {
         return renderTimelineTab();
       case "causation":
         return renderCausationTab();
-
-      // NEW: handle "entity-relations" tab
       case "entity-relations":
         return renderEntityRelationsTab();
-
       case "dictionary-plus":
-        return <DictionaryPlusTab analysisData={analysisData} />;
-
+        return renderDictionaryPlusTab();
       default:
         return <div>No tab selected</div>;
     }
@@ -361,16 +349,7 @@ function AnalysisTabs({ analysisData }) {
         </button>
       </div>
 
-      <div>
-        {activeTab === "summary" && renderSummaryTab()}
-        {activeTab === "entities" && renderEntitiesTab()}
-        {activeTab === "events" && renderEventsTab()}
-        {activeTab === "temporal" && renderTemporalTab()}
-        {activeTab === "timeline" && renderTimelineTab()}
-        {activeTab === "causation" && renderCausationTab()}
-        {activeTab === "entity-relations" && renderEntityRelationsTab()}
-        {activeTab === "dictionary-plus" && <DictionaryPlusTab analysisData={analysisData} />}
-      </div>
+      <div>{renderContent()}</div>
     </div>
   );
 }

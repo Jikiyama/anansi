@@ -86,11 +86,17 @@ function App() {
           <label>Input Text:</label>
           <br />
           <textarea
-            rows={6}
-            cols={60}
             value={inputText}
             onChange={(e) => setInputText(e.target.value)}
             placeholder="Paste your text here..."
+            rows={6}
+            // Make sure the textarea is not too wide and wraps text
+            style={{
+              width: "100%",
+              maxWidth: "600px",
+              wordWrap: "break-word",
+              overflowWrap: "break-word"
+            }}
           />
         </div>
         <button type="submit" disabled={isLoading}>
