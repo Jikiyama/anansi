@@ -1,174 +1,201 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import TimelineTab from "./TimelineTab.jsx";
 import CausationGraph from "./CausationGraph.jsx";
 import EntityRelationsGraph from "./EntityRelationsGraph.jsx";
 import DictionaryPlusTab from "./DictionaryPlusTab.jsx";
 
 function AnalysisTabs({ analysisData }) {
+  // ------------------------- state -----------------------------------------
   const [activeTab, setActiveTab] = useState("summary");
 
-  // Adding this to debug if analysisData is valid
-  console.log("Full Analysis Data:", analysisData);
+  /* Events‑tab local state */
+  const [eventsSearch, setEventsSearch] = useState("");
+  const [eventsPage, setEventsPage] = useState(1);
+  const EVENTS_PER_PAGE = 15;
 
-  const renderSummaryTab = () => {
+  // If search term changes, reset to page 1
+  useEffect(() => {
+    setEventsPage(1);
+  }, [eventsSearch]);
+
+  // ------------------------- Summary --------------------------------------
+  const renderSummaryTab = () => (
+    <div>
+      <h3>Summary</h3>
+      <p>{analysisData.summary || "No summary found"}</p>
+    </div>
+  );
+
+  // ------------------------- Entities -------------------------------------
+  const renderEntitiesTab = () => {
+    const { named_entities } = analysisData;
+    if (!named_entities) return <p>No named entities found.</p>;
+
+    const section = (label, arr = []) => (
+      <>
+        <h4>{label}</h4>
+        <ul>
+          {arr.length ? (
+            arr.map((item, i) => (
+              <li key={i}>
+                <strong>{item.entity}</strong> – {item.description}
+              </li>
+            ))
+          ) : (
+            <li>No {label.toLowerCase()} found</li>
+          )}
+        </ul>
+      </>
+    );
+
     return (
       <div>
-        <h3>Summary</h3>
-        <p>{analysisData.summary || "No summary found"}</p>
+        <h3>Entities</h3>
+        {section("Persons", named_entities.persons)}
+        {section("Organizations", named_entities.organizations)}
+        {section("Locations", named_entities.locations)}
+        {section("Institutions", named_entities.institutions)}
+        {section("Dates", named_entities.dates)}
+        {section("Legal Terms", named_entities.legal_terms)}
       </div>
     );
   };
 
-  const renderEntitiesTab = () => {
-    const { named_entities } = analysisData;
-    if (!named_entities) {
-      return <p>No named entities found.</p>;
-    }
-    return (
-      <div>
-        <h3>Entities</h3>
-        {/* Persons */}
-        <h4>Persons</h4>
-        <ul>
-          {named_entities.persons && named_entities.persons.length > 0 ? (
-            named_entities.persons.map((person, idx) => (
-              <li key={idx}>
-                <strong>{person.entity}</strong> - {person.description}
-              </li>
-            ))
-          ) : (
-            <li>No persons found</li>
-          )}
-        </ul>
-        {/* Organizations */}
-        <h4>Organizations</h4>
-        <ul>
-          {named_entities.organizations && named_entities.organizations.length > 0 ? (
-            named_entities.organizations.map((org, idx) => (
-              <li key={idx}>
-                <strong>{org.entity}</strong> - {org.description}
-              </li>
-            ))
-          ) : (
-            <li>No organizations found</li>
-          )}
-        </ul>
-        {/* Locations */}
-        <h4>Locations</h4>
-        <ul>
-          {named_entities.locations && named_entities.locations.length > 0 ? (
-            named_entities.locations.map((loc, idx) => (
-              <li key={idx}>
-                <strong>{loc.entity}</strong> - {loc.description}
-              </li>
-            ))
-          ) : (
-            <li>No locations found</li>
-          )}
-        </ul>
-        {/* Institutions */}
-        <h4>Institutions</h4>
-        <ul>
-          {named_entities.institutions && named_entities.institutions.length > 0 ? (
-            named_entities.institutions.map((inst, idx) => (
-              <li key={idx}>
-                <strong>{inst.entity}</strong> - {inst.description}
-              </li>
-            ))
-          ) : (
-            <li>No institutions found</li>
-          )}
-        </ul>
-        {/* Dates */}
-        <h4>Dates</h4>
-        <ul>
-          {named_entities.dates && named_entities.dates.length > 0 ? (
-            named_entities.dates.map((dt, idx) => (
-              <li key={idx}>
-                <strong>{dt.entity}</strong> - {dt.description}
-              </li>
-            ))
-          ) : (
-            <li>No dates found</li>
-          )}
-        </ul>
-        {/* Legal Terms */}
-        <h4>Legal Terms</h4>
-        <ul>
-          {named_entities.legal_terms && named_entities.legal_terms.length > 0 ? (
-            named_entities.legal_terms.map((term, idx) => (
-              <li key={idx}>
-                <strong>{term.entity}</strong> - {term.description}
-              </li>
-            ))
-          ) : (
-            <li>No legal terms found</li>
-          )}
-        </ul>
-      </div>
-    );
+  // ------------------------- Events (table + pagination) -------------------
+  const tdStyle = {
+    border: "1px solid #ddd",
+    padding: "8px",
+    verticalAlign: "top",
   };
 
   const renderEventsTab = () => {
     const { events } = analysisData;
-    if (!events || events.length === 0) {
-      return <p>No events found.</p>;
-    }
+    if (!events?.length) return <p>No events found.</p>;
+
+    // --- filtering --------------------------------------------------------
+    const term = eventsSearch.trim().toLowerCase();
+    const filtered = term
+      ? events.filter((e) =>
+          [e.sentence, e.event_type, e.verb, e.agent, e.patients]
+            .filter(Boolean)
+            .some((field) => field.toLowerCase().includes(term))
+        )
+      : events;
+
+    // --- pagination -------------------------------------------------------
+    const totalPages = Math.max(1, Math.ceil(filtered.length / EVENTS_PER_PAGE));
+    const startIdx = (eventsPage - 1) * EVENTS_PER_PAGE;
+    const pageSlice = filtered.slice(startIdx, startIdx + EVENTS_PER_PAGE);
+
+    const pageButton = (num) => (
+      <button
+        key={num}
+        onClick={() => setEventsPage(num)}
+        style={{
+          margin: "0 2px",
+          padding: "4px 8px",
+          background: num === eventsPage ? "#007BFF" : "#f0f0f0",
+          color: num === eventsPage ? "white" : "black",
+          border: "none",
+          borderRadius: "4px",
+          cursor: "pointer",
+        }}
+      >
+        {num}
+      </button>
+    );
+
     return (
       <div>
         <h3>Events</h3>
-        <ul>
-          {events.map((evt, idx) => (
-            <li key={idx} style={{ marginBottom: "1rem" }}>
-              <strong>Sentence:</strong> {evt.sentence}
-              <br />
-              <strong>Event Type:</strong> {evt.event_type}
-              <br />
-              <strong>Verb:</strong> {evt.verb}
-              {evt.agent && (
-                <>
-                  <br />
-                  <strong>Agent:</strong> {evt.agent}
-                </>
-              )}
-              {evt.patients && (
-                <>
-                  <br />
-                  <strong>Patients:</strong> {evt.patients}
-                </>
-              )}
-              {evt.cause && (
-                <>
-                  <br />
-                  <strong>Cause:</strong> {evt.cause}
-                </>
-              )}
-              {evt.purpose_context && (
-                <>
-                  <br />
-                  <strong>Purpose:</strong> {evt.purpose_context}
-                </>
-              )}
-            </li>
-          ))}
-        </ul>
+
+        {/* search box */}
+        <input
+          type="text"
+          placeholder="Search events…"
+          value={eventsSearch}
+          onChange={(e) => setEventsSearch(e.target.value)}
+          style={{ marginBottom: "0.75rem", padding: "6px 10px", width: "100%", maxWidth: "400px" }}
+        />
+
+        {/* table */}
+        <div style={{ overflowX: "auto" }}>
+          <table style={{ borderCollapse: "collapse", width: "100%" }}>
+            <thead>
+              <tr>
+                {[
+                  "Sentence",
+                  "Event Type",
+                  "Verb",
+                  "Agent",
+                  "Patients",
+                  "Cause",
+                  "Purpose",
+                ].map((col) => (
+                  <th
+                    key={col}
+                    style={{
+                      ...tdStyle,
+                      background: "#f2f2f2",
+                      whiteSpace: "nowrap",
+                      textAlign: "left",
+                    }}
+                  >
+                    {col}
+                  </th>
+                ))}
+              </tr>
+            </thead>
+            <tbody>
+              {pageSlice.map((evt, idx) => (
+                <tr key={idx}>
+                  <td style={tdStyle}>{evt.sentence}</td>
+                  <td style={tdStyle}>{evt.event_type}</td>
+                  <td style={tdStyle}>{evt.verb}</td>
+                  <td style={tdStyle}>{evt.agent || "—"}</td>
+                  <td style={tdStyle}>{evt.patients || "—"}</td>
+                  <td style={tdStyle}>{evt.cause || "—"}</td>
+                  <td style={tdStyle}>{evt.purpose_context || "—"}</td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+
+        {/* pagination controls */}
+        <div style={{ marginTop: "0.75rem", display: "flex", alignItems: "center" }}>
+          <button
+            onClick={() => setEventsPage((p) => Math.max(1, p - 1))}
+            disabled={eventsPage === 1}
+            style={{ marginRight: "6px" }}
+          >
+            ◀ Prev
+          </button>
+          {Array.from({ length: totalPages }, (_, i) => pageButton(i + 1))}
+          <button
+            onClick={() => setEventsPage((p) => Math.min(totalPages, p + 1))}
+            disabled={eventsPage === totalPages}
+            style={{ marginLeft: "6px" }}
+          >
+            Next ▶
+          </button>
+        </div>
       </div>
     );
   };
 
+  // ------------------------- Temporal -------------------------------------
   const renderTemporalTab = () => {
     const { temporal_references } = analysisData;
-    if (!temporal_references || temporal_references.length === 0) {
-      return <p>No temporal references found.</p>;
-    }
+    if (!temporal_references?.length) return <p>No temporal references found.</p>;
 
     return (
       <div>
         <h3>Temporal References</h3>
         <ul>
-          {temporal_references.map((tRef, idx) => (
-            <li key={idx}>
-              <strong>{tRef.reference}</strong>: {tRef.description}
+          {temporal_references.map((t, i) => (
+            <li key={i}>
+              <strong>{t.reference}</strong>: {t.description}
             </li>
           ))}
         </ul>
@@ -176,39 +203,34 @@ function AnalysisTabs({ analysisData }) {
     );
   };
 
-  const renderTimelineTab = () => {
-    const timelineData = analysisData.timeline_of_events || [];
-    return <TimelineTab timelineData={timelineData} />;
-  };
+  // ------------------------- Timeline -------------------------------------
+  const renderTimelineTab = () => (
+    <TimelineTab timelineData={analysisData.timeline_of_events || []} />
+  );
 
-  const renderCausationTab = () => {
-    const events_causation = analysisData.events_causation || [];
-    const causation_relations = analysisData.causation_relations || [];
-    return (
-      <div>
-        <h3>Causation</h3>
-        <CausationGraph
-          eventsCausation={events_causation}
-          causationRelations={causation_relations}
-        />
-      </div>
-    );
-  };
+  // ------------------------- Causation ------------------------------------
+  const renderCausationTab = () => (
+    <div>
+      <h3>Causation</h3>
+      <CausationGraph
+        eventsCausation={analysisData.events_causation || []}
+        causationRelations={analysisData.causation_relations || []}
+      />
+    </div>
+  );
 
-  const renderEntityRelationsTab = () => {
-    const entity_relations = analysisData.entity_relations || [];
-    return (
-      <div>
-        <h3>Entity Relations</h3>
-        <EntityRelationsGraph data={entity_relations} />
-      </div>
-    );
-  };
+  // ------------------------- Entity Relations -----------------------------
+  const renderEntityRelationsTab = () => (
+    <div>
+      <h3>Entity Relations</h3>
+      <EntityRelationsGraph data={analysisData.entity_relations || []} />
+    </div>
+  );
 
-  const renderDictionaryPlusTab = () => {
-    return <DictionaryPlusTab analysisData={analysisData} />;
-  };
+  // ------------------------- Dictionary+ ----------------------------------
+  const renderDictionaryPlusTab = () => <DictionaryPlusTab analysisData={analysisData} />;
 
+  // ------------------------- Tab content switcher -------------------------
   const renderContent = () => {
     switch (activeTab) {
       case "summary":
@@ -232,124 +254,40 @@ function AnalysisTabs({ analysisData }) {
     }
   };
 
+  // ------------------------- Tab buttons ----------------------------------
+  const tabBtn = (id, label) => (
+    <button
+      key={id}
+      onClick={() => setActiveTab(id)}
+      style={{
+        background: activeTab === id ? "#007BFF" : "#f0f0f0",
+        color: activeTab === id ? "white" : "black",
+        border: "none",
+        padding: "0.5rem 1rem",
+        marginRight: "0.5rem",
+        marginBottom: "0.5rem",
+        cursor: "pointer",
+        borderRadius: "4px",
+      }}
+    >
+      {label}
+    </button>
+  );
+
+  // ------------------------- Render ---------------------------------------
   return (
     <div>
-      <div style={{ display: "flex", marginBottom: "1rem" }}>
-        <button
-          onClick={() => setActiveTab("summary")}
-          style={{
-            backgroundColor: activeTab === "summary" ? "#007BFF" : "#f0f0f0",
-            color: activeTab === "summary" ? "white" : "black",
-            border: "none",
-            padding: "0.5rem 1rem",
-            marginRight: "0.5rem",
-            cursor: "pointer",
-            borderRadius: "4px",
-          }}
-        >
-          Summary
-        </button>
-        <button
-          onClick={() => setActiveTab("entities")}
-          style={{
-            backgroundColor: activeTab === "entities" ? "#007BFF" : "#f0f0f0",
-            color: activeTab === "entities" ? "white" : "black",
-            border: "none",
-            padding: "0.5rem 1rem",
-            marginRight: "0.5rem",
-            cursor: "pointer",
-            borderRadius: "4px",
-          }}
-        >
-          Entities
-        </button>
-        <button
-          onClick={() => setActiveTab("events")}
-          style={{
-            backgroundColor: activeTab === "events" ? "#007BFF" : "#f0f0f0",
-            color: activeTab === "events" ? "white" : "black",
-            border: "none",
-            padding: "0.5rem 1rem",
-            marginRight: "0.5rem",
-            cursor: "pointer",
-            borderRadius: "4px",
-          }}
-        >
-          Events
-        </button>
-        <button
-          onClick={() => setActiveTab("temporal")}
-          style={{
-            backgroundColor: activeTab === "temporal" ? "#007BFF" : "#f0f0f0",
-            color: activeTab === "temporal" ? "white" : "black",
-            border: "none",
-            padding: "0.5rem 1rem",
-            marginRight: "0.5rem",
-            cursor: "pointer",
-            borderRadius: "4px",
-          }}
-        >
-          Temporal
-        </button>
-        <button
-          onClick={() => setActiveTab("timeline")}
-          style={{
-            backgroundColor: activeTab === "timeline" ? "#007BFF" : "#f0f0f0",
-            color: activeTab === "timeline" ? "white" : "black",
-            border: "none",
-            padding: "0.5rem 1rem",
-            marginRight: "0.5rem",
-            cursor: "pointer",
-            borderRadius: "4px",
-          }}
-        >
-          Timeline
-        </button>
-        <button
-          onClick={() => setActiveTab("causation")}
-          style={{
-            backgroundColor: activeTab === "causation" ? "#007BFF" : "#f0f0f0",
-            color: activeTab === "causation" ? "white" : "black",
-            border: "none",
-            padding: "0.5rem 1rem",
-            marginRight: "0.5rem",
-            cursor: "pointer",
-            borderRadius: "4px",
-          }}
-        >
-          Causation
-        </button>
-        <button
-          onClick={() => setActiveTab("entity-relations")}
-          style={{
-            backgroundColor: activeTab === "entity-relations" ? "#007BFF" : "#f0f0f0",
-            color: activeTab === "entity-relations" ? "white" : "black",
-            border: "none",
-            padding: "0.5rem 1rem",
-            marginRight: "0.5rem",
-            cursor: "pointer",
-            borderRadius: "4px",
-          }}
-        >
-          Entity Relations
-        </button>
-        <button
-          onClick={() => setActiveTab("dictionary-plus")}
-          style={{
-            backgroundColor: activeTab === "dictionary-plus" ? "#007BFF" : "#f0f0f0",
-            color: activeTab === "dictionary-plus" ? "white" : "black",
-            border: "none",
-            padding: "0.5rem 1rem",
-            marginRight: "0.5rem",
-            cursor: "pointer",
-            borderRadius: "4px",
-          }}
-        >
-          Dictionary+
-        </button>
+      <div style={{ display: "flex", flexWrap: "wrap", marginBottom: "1rem" }}>
+        {tabBtn("summary", "Summary")}
+        {tabBtn("entities", "Entities")}
+        {tabBtn("events", "Events")}
+        {tabBtn("temporal", "Temporal")}
+        {tabBtn("timeline", "Timeline")}
+        {tabBtn("causation", "Causation")}
+        {tabBtn("entity-relations", "Entity Relations")}
+        {tabBtn("dictionary-plus", "Dictionary+")}
       </div>
-
-      <div>{renderContent()}</div>
+      {renderContent()}
     </div>
   );
 }
