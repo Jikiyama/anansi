@@ -293,3 +293,73 @@ Here is the text to analyze:
         }
     print(analysis_json)
     return analysis_json
+
+# -------------------- New helper analyses (POS & morphology) --------------------
+
+def analyze_parts_of_speech(input_text: str, language: str = "English"):
+    """Return a basic part-of-speech tagging of *input_text*.
+
+    If the OpenAI key is available we ask the model; otherwise we fall back to a
+    very naive whitespace tokenizer that labels everything as "UNK" so that the
+    Flask endpoint does not crash.
+    """
+    try:
+        instructions = f"""
+You are an expert linguist. Given the following text, return a JSON array where
+each object has the keys *token* and *pos* (using universal POS tags).  Respond
+**only** with JSON like:
+[
+  {{ "token": "The", "pos": "DET" }},
+  {{ "token": "cat", "pos": "NOUN" }}
+]
+
+Text:
+{input_text}
+IMPORTANT: WRITE THE JSON IN {language}
+        """.strip()
+        client = OpenAI()
+        response = client.chat.completions.create(
+            model="o3-mini",
+            messages=[{"role": "user", "content": instructions}]
+        )
+        raw = response.choices[0].message.content.strip().replace("```json", "").replace("```", "")
+        return json.loads(raw)
+    except Exception as exc:
+        # Fallback – naive split, mark as UNK
+        tokens = [t for t in input_text.split() if t]
+        return [{"token": tok, "pos": "UNK"} for tok in tokens]
+
+
+def analyze_word_morphology(word: str, language: str = "English"):
+    """Return a simple morphological analysis for *word*.
+
+    Attempts an OpenAI call; if that fails, returns a stub analysis containing
+    the word length and some basic surface facts so the endpoint remains
+    functional.
+    """
+    try:
+        instructions = f"""
+You are an expert morphologist. Analyse the following *single* word and return
+its morphological components in JSON form with keys *lemma*, *part_of_speech*,
+*tense_aspect* (if applicable), *number*, *gender* (if applicable), and an
+array *derivations* of any relevant roots or affixes.
+Respond **only** with JSON.
+
+Word: {word}
+Language: {language}
+        """.strip()
+        client = OpenAI()
+        response = client.chat.completions.create(
+            model="o3-mini",
+            messages=[{"role": "user", "content": instructions}]
+        )
+        raw = response.choices[0].message.content.strip().replace("```json", "").replace("```", "")
+        return json.loads(raw)
+    except Exception:
+        return {
+            "word": word,
+            "language": language,
+            "length": len(word),
+            "contains_hyphen": "-" in word,
+            "analysis": "(morphology unavailable)"
+        }
