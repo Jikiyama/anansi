@@ -1,5 +1,6 @@
 # temporal_reasoning.py
 import json
+import os
 from openai import OpenAI
 def analyze_text_entities(input_text : str, language : str):
     instructions = """ 
@@ -33,7 +34,7 @@ Deliver a response like this
     """
     
     instructions = instructions + f"\nHere is the input text:\n{input_text}\nIMPORTANT: MAKE SURE THE OUTPUT/ANALYSIS WRITTEN TO THE JSON IS WRITTEN IN THIS LANGUAGE: {language}\n"
-    client = OpenAI(api_key='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')
+    client = OpenAI(api_key=os.environ.get("OPENAI_API_KEY"))
     response = client.chat.completions.create(
         model="o3-mini",
         messages=[{"role": "user", "content": instructions}]
@@ -75,7 +76,7 @@ Your answer should be presented, ONLY AND SPECIFICALLY, as a json with the follo
     """
     
     instructions = instructions + f"\nHere is the input text:\n{input_text}\nIMPORTANT: MAKE SURE THE OUTPUT/ANALYSIS WRITTEN TO THE JSON IS WRITTEN IN THIS LANGUAGE: {language}\n"
-    client = OpenAI(api_key='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')
+    client = OpenAI(api_key=os.environ.get("OPENAI_API_KEY"))
     response = client.chat.completions.create(
         model="o4-mini",
         messages=[{"role": "user", "content": instructions}]
@@ -247,7 +248,7 @@ Here is the text to analyze:
 
     # 3) Call the ChatGPT o3-mini endpoint using the OpenAI library
     #    (This is just an example; adapt to your own usage)
-    client = OpenAI(api_key='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')
+    client = OpenAI(api_key=os.environ.get("OPENAI_API_KEY"))
     response = client.chat.completions.create(
         model="o4-mini",
         messages=[{"role": "user", "content": full_prompt}]
@@ -317,7 +318,7 @@ Text:
 {input_text}
 IMPORTANT: WRITE THE JSON IN {language}
         """.strip()
-        client = OpenAI()
+        client = OpenAI(api_key=os.environ.get("OPENAI_API_KEY"))
         response = client.chat.completions.create(
             model="o3-mini",
             messages=[{"role": "user", "content": instructions}]
@@ -348,7 +349,7 @@ Respond **only** with JSON.
 Word: {word}
 Language: {language}
         """.strip()
-        client = OpenAI()
+        client = OpenAI(api_key=os.environ.get("OPENAI_API_KEY"))
         response = client.chat.completions.create(
             model="o3-mini",
             messages=[{"role": "user", "content": instructions}]
