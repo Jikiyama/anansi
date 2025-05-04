@@ -1,35 +1,6 @@
 # temporal_reasoning.py
 import json
-import os
-from datetime import datetime
 from openai import OpenAI
-
-
-def log_to_file(function_name, content, prefix=""):
-    """
-    Helper function to log content to a file.
-    
-    :param function_name: Name of the function (used for the filename)
-    :param content: Content to log
-    :param prefix: Optional prefix for the log entry
-    """
-    # Create logs directory if it doesn't exist
-    if not os.path.exists("logs"):
-        os.makedirs("logs")
-    
-    # Format timestamp
-    timestamp = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
-    
-    # Create log filename
-    filename = f"logs/{function_name}_logs.txt"
-    
-    # Write to log file
-    with open(filename, "a", encoding="utf-8") as log_file:
-        log_file.write(f"=== {timestamp} {prefix} ===\n")
-        log_file.write(content)
-        log_file.write("\n\n")
-
-
 def analyze_text_entities(input_text : str, language : str):
     instructions = """ 
     You are an expert text analyst. You are given a text passage (one or more sentences). Your task is to perform a structured, in-depth analysis of the text and return the results in JSON format.
@@ -62,101 +33,65 @@ Deliver a response like this
     """
     
     instructions = instructions + f"\nHere is the input text:\n{input_text}\nIMPORTANT: MAKE SURE THE OUTPUT/ANALYSIS WRITTEN TO THE JSON IS WRITTEN IN THIS LANGUAGE: {language}\n"
-    
-    # Log the prompt
-    log_to_file("analyze_text_entities", instructions, "PROMPT")
-    
-    client = OpenAI(api_key=os.getenv("OPENAI_API_KEY"))
+    client = OpenAI(api_key='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')
     response = client.chat.completions.create(
         model="o3-mini",
         messages=[{"role": "user", "content": instructions}]
     )
-    
+    print(response.choices[0].message.content.strip())
     raw_answer = response.choices[0].message.content.strip()
-    
-    # Log the response
-    log_to_file("analyze_text_entities", raw_answer, "RESPONSE")
-    
-    print(raw_answer)
     raw_answer = raw_answer.replace("```json", "").replace("```", "")
     final_json_str = raw_answer.strip()
     print(final_json_str)
     try:
         analysis_json = json.loads(final_json_str)
     except json.JSONDecodeError:
-        error_msg = f"JSON parsing failed. Raw output was:\n{final_json_str}"
-        log_to_file("analyze_text_entities", error_msg, "ERROR")
         analysis_json = {
-            "events_causation": [],
-            "causation_relations": [],
-            "error": error_msg
+            "entity_relations": [],
+            "error": "JSON parsing failed. Raw output was:\n" + final_json_str
         }
     return analysis_json
-
+    
+    
 def analyze_text_causation(input_text : str, language : str):
     instructions = """ 
     You are an expert text analyst. You are given a text passage (one or more sentences). Your task is to perform a structured, in-depth analysis of the text and return the results in JSON format.
-In this specific case, you are tasked with understanding the causation relations between the events in the text. Your answer should be presented, ONLY AND SPECIFICALLY, as a json with the following contents:
+  In this specific case, you are tasked with understanding the relations between the events using event-to-event relation types that researchers, information-extraction shared tasks (TimeML / TempEval, Rich ERE, MUC, PropBank, Causal-TimeBank, etc.), and cognitive-linguistic accounts commonly use. 
+Your answer should be presented, ONLY AND SPECIFICALLY, as a json with the following contents:
 
 {
-   "events_causation":[
-        {
-            "occurrence_summary":""
-        },
-        {
-           "occurrence_summary":""
-        }
-    ]
-   "causation_relations":[
-        {
-             "source_occurrence_summary":"",
-             "target_occurrence_summary":""
-        },
-        {
-             "source_occurrence_summary":"",
-             "target_occurrence_summary":""
-        }
-    ]
+  "events": {
+    "e1": "The CEO announced the merger",
+    "e2": "the stock price jumped",
+    "e3": "shareholders approved the deal"
+  },
+  "relations": [
+    { "source": "e1", "target": "e2", "type": "CAUSES" },
+    { "source": "e1", "target": "e3", "type": "ENABLES" },
+    { "source": "e3", "target": "e2", "type": "AFTER" }
+  ]
 }
-
-Note that, the occurrence summary in the causation relations should be exactly as they appear in the occurrence_summmary on top. Only fill out the json file if there are proven CAUSATION relations, if there are none, it is fine to return an empty json. Causation relations are events that lead to another, for example, in the sentence:
-
-In response to President Trump's tariffs, China has now enacted tariffs of their own
-
-So in this case, Trump Imposes Tariffs on China has a causation relation directed towards China Imposes Tariffs on the U.S. Write the occurrence summaries in the voice shown, speaking as a matter of fact.
-    The occurrence summaries should also be short, try to keep them to a few words.
     Here is the input text: 
     """
     
     instructions = instructions + f"\nHere is the input text:\n{input_text}\nIMPORTANT: MAKE SURE THE OUTPUT/ANALYSIS WRITTEN TO THE JSON IS WRITTEN IN THIS LANGUAGE: {language}\n"
-    
-    # Log the prompt
-    log_to_file("analyze_text_causation", instructions, "PROMPT")
-    
-    client = OpenAI(api_key=os.getenv("OPENAI_API_KEY"))
+    client = OpenAI(api_key='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')
     response = client.chat.completions.create(
-        model="o3-mini",
+        model="o4-mini",
         messages=[{"role": "user", "content": instructions}]
     )
-    
+    print(response.choices[0].message.content.strip())
     raw_answer = response.choices[0].message.content.strip()
-    
-    # Log the response
-    log_to_file("analyze_text_causation", raw_answer, "RESPONSE")
-    
-    print(raw_answer)
     raw_answer = raw_answer.replace("```json", "").replace("```", "")
     final_json_str = raw_answer.strip()
     print(final_json_str)
     try:
         analysis_json = json.loads(final_json_str)
     except json.JSONDecodeError:
-        error_msg = f"JSON parsing failed. Raw output was:\n{final_json_str}"
-        log_to_file("analyze_text_causation", error_msg, "ERROR")
         analysis_json = {
-            "events_causation": [],
-            "causation_relations": [],
-            "error": error_msg
+            "events": {},
+            "relations": [],
+            "error": "JSON parsing failed. Raw output was:\n" + final_json_str
         }
     return analysis_json
 
@@ -309,24 +244,17 @@ Here is the text to analyze:
 {input_text}
 """
     print("here is the prompt i used\n", full_prompt)
-    
-    # Log the prompt
-    log_to_file("analyze_text_events", full_prompt, "PROMPT")
 
     # 3) Call the ChatGPT o3-mini endpoint using the OpenAI library
     #    (This is just an example; adapt to your own usage)
-    client = OpenAI(api_key=os.getenv("OPENAI_API_KEY"))
+    client = OpenAI(api_key='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')
     response = client.chat.completions.create(
-        model="o3-mini",
+        model="o4-mini",
         messages=[{"role": "user", "content": full_prompt}]
     )
 
     # 4) Extract the model's content
     raw_answer = response.choices[0].message.content.strip()
-    
-    # Log the response
-    log_to_file("analyze_text_events", raw_answer, "RESPONSE")
-    
     raw_answer = raw_answer.replace("```json", "").replace("```", "")
     outputFile = open("answer.txt", "w")
     outputFile.write(raw_answer)
@@ -348,8 +276,6 @@ Here is the text to analyze:
     try:
         analysis_json = json.loads(final_json_str)
     except json.JSONDecodeError:
-        error_msg = f"JSON parsing failed. Raw output was:\n{final_json_str}"
-        log_to_file("analyze_text_events", error_msg, "ERROR")
         analysis_json = {
             "events": [],
             "named_entities": {
@@ -363,106 +289,7 @@ Here is the text to analyze:
             "temporal_references": [],
             "important_notes": [],
             "timeline_of_events": [],
-            "error": error_msg
+            "error": "JSON parsing failed. Raw output was:\n" + final_json_str
         }
     print(analysis_json)
     return analysis_json
-
-def analyze_parts_of_speech(input_text: str):
-    """
-    Analyzes the input text using OpenAI to identify part of speech for each token.
-    
-    :param input_text: The text to analyze
-    :return: A Python dict containing the parts of speech for each token
-    """
-    instructions = """
-    For the following text, produce a json with an array of the part of speech of every token in this fashion:
-    
-    {
-      "parts_of_speech": [
-        {
-          "token": "word1",
-          "tokenId": 0,
-          "partOfSpeech": "Pronoun"
-        },
-        {
-          "token": "word2",
-          "tokenId": 1,
-          "partOfSpeech": "Verb"
-        },
-        ...
-      ]
-    }
-    
-    Use the following part of speech categories: Noun, Proper Noun, Pronoun, Verb, Adjective, Adverb, Preposition, Conjunction, Interjection, Article, Numeral, Determiner, Auxiliary Verb, Particle, Punctuation.
-    
-    Here is the input text:
-    """
-    
-    instructions = instructions + f"\n{input_text}\n"
-    
-    # Log the prompt
-    log_to_file("analyze_parts_of_speech", instructions, "PROMPT")
-    
-    client = OpenAI(api_key=os.getenv("OPENAI_API_KEY"))
-    response = client.chat.completions.create(
-        model="gpt-4o-mini",  # Using a cheaper model as suggested
-        messages=[{"role": "user", "content": instructions}]
-    )
-    
-    raw_answer = response.choices[0].message.content.strip()
-    
-    # Log the response
-    log_to_file("analyze_parts_of_speech", raw_answer, "RESPONSE")
-    
-    raw_answer = raw_answer.replace("```json", "").replace("```", "")
-    final_json_str = raw_answer.strip()
-    
-    try:
-        analysis_json = json.loads(final_json_str)
-    except json.JSONDecodeError:
-        error_msg = f"JSON parsing failed. Raw output was:\n{final_json_str}"
-        log_to_file("analyze_parts_of_speech", error_msg, "ERROR")
-        analysis_json = {
-            "parts_of_speech": [],
-            "error": error_msg
-        }
-    
-    return analysis_json
-
-def analyze_word_morphology(word: str, language: str):
-    """
-    Performs morphological analysis on a specific word.
-    
-    :param word: The word to analyze
-    :param language: The language of the word
-    :return: A Python dict containing the morphological analysis
-    """
-    instructions = f"""
-    Can you help me? I would like for you to do morphological analysis in the following {language} word:
-    
-    {word}
-    
-    Provide the response in a sentence like this:
-    "This is a verb, in this tense, in this voice, etc...."
-    "This is a noun that means ...." (in some languages, specify if the noun is using the masculine or feminine form)
-    """
-    
-    # Log the prompt
-    log_to_file("analyze_word_morphology", instructions, "PROMPT")
-    
-    client = OpenAI(api_key=os.getenv("OPENAI_API_KEY"))
-    response = client.chat.completions.create(
-        model="gpt-4o-mini",  # Using a cheaper model as suggested
-        messages=[{"role": "user", "content": instructions}]
-    )
-    
-    analysis = response.choices[0].message.content.strip()
-    
-    # Log the response
-    log_to_file("analyze_word_morphology", analysis, "RESPONSE")
-    
-    return {
-        "word": word,
-        "analysis": analysis
-    }

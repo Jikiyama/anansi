@@ -1,8 +1,9 @@
 import React, { useState, useEffect } from "react";
 import TimelineTab from "./TimelineTab.jsx";
-import CausationGraph from "./CausationGraph.jsx";
+// import CausationGraph from "./CausationGraph.jsx"; // deprecated
 import EntityRelationsGraph from "./EntityRelationsGraph.jsx";
 import DictionaryPlusTab from "./DictionaryPlusTab.jsx";
+import EventRelationsGraph from "./EventRelationsGraph.jsx";
 
 function AnalysisTabs({ analysisData }) {
   // ------------------------- state -----------------------------------------
@@ -13,7 +14,7 @@ function AnalysisTabs({ analysisData }) {
   const [eventsPage, setEventsPage] = useState(1);
   const EVENTS_PER_PAGE = 15;
 
-  // If search term changes, reset to page 1
+  // If search term changes, reset to page 1
   useEffect(() => {
     setEventsPage(1);
   }, [eventsSearch]);
@@ -208,14 +209,11 @@ function AnalysisTabs({ analysisData }) {
     <TimelineTab timelineData={analysisData.timeline_of_events || []} />
   );
 
-  // ------------------------- Causation ------------------------------------
-  const renderCausationTab = () => (
+  // ------------------------- Event Relations -----------------------------
+  const renderEventRelationsTab = () => (
     <div>
-      <h3>Causation</h3>
-      <CausationGraph
-        eventsCausation={analysisData.events_causation || []}
-        causationRelations={analysisData.causation_relations || []}
-      />
+      <h3>Event Relations</h3>
+      <EventRelationsGraph data={analysisData.event_relations || {}} />
     </div>
   );
 
@@ -243,8 +241,8 @@ function AnalysisTabs({ analysisData }) {
         return renderTemporalTab();
       case "timeline":
         return renderTimelineTab();
-      case "causation":
-        return renderCausationTab();
+      case "event-relations":
+        return renderEventRelationsTab();
       case "entity-relations":
         return renderEntityRelationsTab();
       case "dictionary-plus":
@@ -283,7 +281,7 @@ function AnalysisTabs({ analysisData }) {
         {tabBtn("events", "Events")}
         {tabBtn("temporal", "Temporal")}
         {tabBtn("timeline", "Timeline")}
-        {tabBtn("causation", "Causation")}
+        {tabBtn("event-relations", "Event Relations")}
         {tabBtn("entity-relations", "Entity Relations")}
         {tabBtn("dictionary-plus", "Dictionary+")}
       </div>

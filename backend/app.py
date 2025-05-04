@@ -46,9 +46,16 @@ def analyze():
         "important_notes": results.get("important_notes", []),
         "timeline_of_events": results.get("timeline_of_events", []),
         "summary": results.get("summary", ""),
-        "events_causation": causation_analysis.get("events_causation", []),
-        "causation_relations": causation_analysis.get("causation_relations", []),
-        "entity_relations": entity_relations.get("entity_relations",[])
+        # Structured event-to-event relations (causation, temporal ordering, etc.)
+        # The new analyze_text_causation() format returns {
+        #   "events": { "e1": "…", ... },
+        #   "relations": [ { "source": "e1", "target": "e2", "type": "CAUSES" }, ... ]
+        # }
+        # We expose this unaltered under the key `event_relations` for the frontend.
+        "event_relations": causation_analysis,
+
+        # Entity-to-entity relations extracted by analyze_text_entities()
+        "entity_relations": entity_relations.get("entity_relations", [])
     }
 
     return jsonify(unified_json)

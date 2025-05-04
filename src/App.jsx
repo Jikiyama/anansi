@@ -108,7 +108,7 @@ function App() {
   /* ---------------------------- home / form --------------------------- */
   return (
     <div style={{ margin: "20px", fontFamily: "Arial, sans-serif" }}>
-      <h1>Advanced Narrative Analytics System Infrastructure 2.0</h1>
+      <h1>Advanced Narrative Analytics System Infrastructure 2.0</h1>
       <form onSubmit={handleSubmit} style={{ marginBottom: "2rem" }}>
         <div style={{ marginBottom: "1rem" }}>
           <label>Document Date: </label>
