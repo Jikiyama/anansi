@@ -56,7 +56,7 @@ Deliver a response like this
     
 def analyze_text_causation(input_text : str, language : str):
     instructions = """ 
-    You are an expert text analyst. You are given a text passage (one or more sentences). Your task is to perform a structured, in-depth analysis of the text and return the results in JSON format.
+    You are an expert text analyst. You are given a text passage (one or more sentences). Your task is to perform a structured, in-depth analysis of the text and return the results in JSON format. 
   In this specific case, you are tasked with understanding the relations between the events using event-to-event relation types that researchers, information-extraction shared tasks (TimeML / TempEval, Rich ERE, MUC, PropBank, Causal-TimeBank, etc.), and cognitive-linguistic accounts commonly use. 
 Your answer should be presented, ONLY AND SPECIFICALLY, as a json with the following contents:
 
@@ -72,6 +72,7 @@ Your answer should be presented, ONLY AND SPECIFICALLY, as a json with the follo
     { "source": "e3", "target": "e2", "type": "AFTER" }
   ]
 }
+    Ensure that the event names are short phrases not longer than 6-7 words.
     Here is the input text: 
     """
     
@@ -224,6 +225,7 @@ Warnings:
 - Do not fabricate data. If something is not explicitly stated, leave it out or mark it as an assumption.
 - Every event-denoting verb or nominalization should be reflected in the "events" array.
 - If a category (e.g., "institutions") has no entries, return an empty array for that category.
+- Ensure the summary is not longer than more than 100 words
 
 Given the document date which may or may not be provided: <insert date>, build a timeline of all relevant events described in this text. Provide the output of this timeline as follows:
 Date of Event: Normalized date, use the document date to determine it, if it can't be determined you can give a relative date. For date ranges, provide a start and end date.
