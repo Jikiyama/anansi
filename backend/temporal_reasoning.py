@@ -125,11 +125,10 @@ def analyze_text_events(input_text: str, doc_date_: str, language : str):
 You are an expert text analyst. You are given a text passage (one or more sentences). Your task is to perform a structured, in-depth analysis of the text and return the results in JSON format.
 Please follow these steps:
 Break down the analysis by sentences, and note every temporal reference, event, and named entity, indicating the sentence from which you extracted it.
-Identify every event (any action, occurrence, or communication indicated by a verb or verbal noun):
+Identify every major event :
 For each event, create a JSON object with:
 sentence: Sentence the word appeared in
 event_type: Classify the event (e.g., accident, statement, etc.)
-verb: The main verb or nominal form representing the event
 agent: Who or what performs the action (if identified)
 patients: Who or what is affected (if applicable)
 temporal_reference: Any explicit time references
@@ -158,7 +157,6 @@ Return everything as a single JSON object formatted like this:
     {
       "sentence": "",
       "event_type": "",
-      "verb": "",
       "agent": "",
       "patients": "",
       "temporal_reference": "",
