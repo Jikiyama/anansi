@@ -36,7 +36,7 @@ Deliver a response like this
     instructions = instructions + f"\nHere is the input text:\n{input_text}\nIMPORTANT: MAKE SURE THE OUTPUT/ANALYSIS WRITTEN TO THE JSON IS WRITTEN IN THIS LANGUAGE: {language}\n"
     client = OpenAI(api_key=os.environ.get("OPENAI_API_KEY"))
     response = client.chat.completions.create(
-        model="o3-mini",
+        model="o4-mini",
         messages=[{"role": "user", "content": instructions}]
     )
     print(response.choices[0].message.content.strip())
@@ -225,7 +225,7 @@ Warnings:
 - Do not fabricate data. If something is not explicitly stated, leave it out or mark it as an assumption.
 - Every event-denoting verb or nominalization should be reflected in the "events" array.
 - If a category (e.g., "institutions") has no entries, return an empty array for that category.
-- Ensure the summary is not longer than more than 100 words
+- Ensure the summary is not longer than more than 50 words
 
 Given the document date which may or may not be provided: <insert date>, build a timeline of all relevant events described in this text. Provide the output of this timeline as follows:
 Date of Event: Normalized date, use the document date to determine it, if it can't be determined you can give a relative date. For date ranges, provide a start and end date.
