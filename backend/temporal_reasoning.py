@@ -331,36 +331,39 @@ IMPORTANT: WRITE THE JSON IN {language}
         return [{"token": tok, "pos": "UNK"} for tok in tokens]
 
 
-def analyze_word_morphology(word: str, language: str = "English"):
-    """Return a simple morphological analysis for *word*.
-
-    Attempts an OpenAI call; if that fails, returns a stub analysis containing
-    the word length and some basic surface facts so the endpoint remains
-    functional.
+def analyze_word_morphology(word: str, language: str):
     """
-    try:
-        instructions = f"""
-You are an expert morphologist. Analyse the following *single* word and return
-its morphological components in JSON form with keys *lemma*, *part_of_speech*,
-*tense_aspect* (if applicable), *number*, *gender* (if applicable), and an
-array *derivations* of any relevant roots or affixes.
-Respond **only** with JSON.
+    Performs morphological analysis on a specific word.
+    
+    :param word: The word to analyze
+    :param language: The language of the word
+    :return: A Python dict containing the morphological analysis
+    """
+    instructions = f"""
+    Can you help me? I would like for you to do morphological analysis in the following {language} word:
+    
+    {word}
+    
+    Provide the response in a sentence like this:
+    "This is a verb, in this tense, in this voice, etc...."
+    "This is a noun that means ...." (in some languages, specify if the noun is using the masculine or feminine form)
+    """
 
-Word: {word}
-Language: {language}
-        """.strip()
-        client = OpenAI(api_key=os.environ.get("OPENAI_API_KEY"))
-        response = client.chat.completions.create(
-            model="o3-mini",
-            messages=[{"role": "user", "content": instructions}]
-        )
-        raw = response.choices[0].message.content.strip().replace("```json", "").replace("```", "")
-        return json.loads(raw)
-    except Exception:
-        return {
-            "word": word,
-            "language": language,
-            "length": len(word),
-            "contains_hyphen": "-" in word,
-            "analysis": "(morphology unavailable)"
-        }
+    # Log the prompt
+    log_to_file("analyze_word_morphology", instructions, "PROMPT")
+
+    client = OpenAI(api_key=os.getenv("OPENAI_API_KEY"))
+    response = client.chat.completions.create(
+        model="gpt-4o-mini",  # Using a cheaper model as suggested
+        messages=[{"role": "user", "content": instructions}]
+    )
+
+    analysis = response.choices[0].message.content.strip()
+
+    # Log the response
+    log_to_file("analyze_word_morphology", analysis, "RESPONSE")
+
+    return {
+        "word": word,
+        "analysis": analysis
+    }
